@@ -173,9 +173,3 @@ void DeckGUI::timerCallback()
 //    DBG("DeckGUI::timerCallback");
     waveformDisplay.setPositionRelative(player->getPositionRelative());
 }
-
-// adding some bs to be removed
-void bsToBeRemoved()
-{
-    std::cout << "BS to be removed" << std::endl;
-}
