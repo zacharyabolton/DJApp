@@ -48,8 +48,17 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     posSlider.setRange(0.0, 1.0);
     
     // final project gui component code
+    freqDial.setRange(20.0f, 20000.0f);
+    freqDial.setValue(600.0f);
+    resDial.setRange(1.0f, 5.0f);
+    resDial.setValue(2.0f);
+    
     freqDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
     resDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
+    
+    freqDial.setSkewFactorFromMidPoint(1000.0f);
+    
+    player->updateFilter(freqDial.getValue(), resDial.getValue());
     // END final project gui component code
 
     startTimer(100);
@@ -140,13 +149,10 @@ void DeckGUI::sliderValueChanged(juce::Slider* slider)
         player->setPositionRelative(slider->getValue());
     }
     // final project gui component code
-    if (slider == &freqDial)
+    if (slider == &freqDial || slider == &resDial)
     {
-        std::cout << "DeckGUI::sliderValueChanged freqDial changed to " << slider->getValue() << std::endl;
-    }
-    if (slider == &resDial)
-    {
-        std::cout << "DeckGUI::sliderValueChanged resDial changed to " << slider->getValue() << std::endl;
+        DBG("DeckGUI::sliderValueChanged freqDial changed to " << slider->getValue());
+        player->updateFilter(freqDial.getValue(), resDial.getValue());
     }
     // END final project gui component code
 }

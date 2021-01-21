@@ -23,12 +23,58 @@ DJAudioPlayer::~DJAudioPlayer()
 
 void DJAudioPlayer::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
+    // final project gui component code
+//    lastSampleRate = sampleRate;
+//    juce::dsp::ProcessSpec spec;
+//    spec.sampleRate = lastSampleRate;
+//    spec.maximumBlockSize = samplesPerBlockExpected;
+//    spec.numChannels = 2;
+//
+//    stateVariableFilter.reset(); // might clash
+//    stateVariableFilter.prepare(spec);
+//
+//    stateVariableFilter.state->type = juce::dsp::StateVariableFilter::Parameters<double>::Type::highPass;
+    juce::dsp::ProcessSpec spec;
+    spec.maximumBlockSize = samplesPerBlockExpected;
+    spec.sampleRate = sampleRate;
+    spec.numChannels = getTotalNumOutputChannels();
+    
+    filter.prepare(spec);
+    
+    filter.setType(juce::dsp::StateVariableTPTFilterType::highpass); // unsure
+    
+    reset();
+    // END final project gui component code
+    
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
     resampleSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
+void DJAudioPlayer::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
+{
+    juce::ScopedNoDenormals noDenormals;
+    auto totalNumInputChannels = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; i++)
+    {
+        buffer.clear(i, 0, buffer.getNumSamples());
+    }
+    
+    filter.setCutoffFrequency(150.0f);
+    
+    auto audioBlock = juce::dsp::AudioBlock<float> (buffer);
+    auto context = juce::dsp::ProcessContextReplacing<float> (audioBlock);
+    
+    filter.process(context);
+}
+
 void DJAudioPlayer::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
+    // final project gui component code
+//    juce::dsp::AudioBlock<juce::AudioSourceChannelInfo> block (bufferToFill);
+//    stateVariableFilter.process(juce::dsp::ProcessContextReplacing<double> (block));
+    // END final project gui component code
+    
     resampleSource.getNextAudioBlock(bufferToFill);
 }
 
@@ -102,3 +148,21 @@ double DJAudioPlayer::getPositionRelative() const
 {
     return transportSource.getCurrentPosition() / transportSource.getLengthInSeconds();
 }
+
+// final project gui component code
+void DJAudioPlayer::reset()
+{
+    filter.reset();
+}
+
+const juce::String DJAudioPlayer::getName() const
+{
+    return juce::String{"High pass"};
+}
+
+void DJAudioPlayer::updateFilter(double freq, double res)
+{
+    DBG("DJAudioPlayer::updateFilter freq = " << freq << "; res = " << res);
+//    stateVariableFilter.state->setCutOffFrequency(lastSampleRate, freq, res);
+}
+// END final project gui component code

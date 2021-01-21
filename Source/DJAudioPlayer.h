@@ -12,7 +12,9 @@
 
 #include "JuceHeader.h"
 
-class DJAudioPlayer : public juce::AudioSource {
+class DJAudioPlayer :   public juce::AudioSource,
+                        public juce::AudioProcessor
+{
 public:
     /** constructor */
     DJAudioPlayer(juce::AudioFormatManager& _formatManager);
@@ -24,6 +26,22 @@ public:
      sets up and allocates resources in preparation for audio file playback
      */
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
+    
+    // final project gui component code
+    /**
+     From https://docs.juce.com/master/classAudioProcessor.html
+     "Returns the name of this processor."
+     */
+    const juce::String getName() const override;
+    /**
+     From https://docs.juce.com/master/classAudioProcessor.html
+     "Renders the next block.
+     
+     When this method is called, the buffer contains a number of channels which is at least as great as the maximum number of input and output channels that this processor is using. It will be filled with the processor's input data and should be replaced with the processor's output."
+     */
+    void processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages) override;
+    // END final project gui component code
+    
     /**
      From https://docs.juce.com/master/classAudioSource.html "Called repeatedly to fetch subsequent blocks of audio data."
      recieves and manages chunks of audio in the form of buffers
@@ -53,10 +71,28 @@ public:
     /** get the relative position of the playhead */
     double getPositionRelative() const;
     
+    // final project gui component code
+    /** update the state of the filter as the user changes parameters */
+    void updateFilter(double freq, double res);
+    // END final project gui component code
+    
 private:
     juce::AudioFormatManager& formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::AudioTransportSource transportSource;
     juce::ResamplingAudioSource resampleSource{&transportSource, false, 2};
 
+    // final project gui component code
+    void reset() override;
+    
+    juce::dsp::StateVariableTPTFilter<float> filter;
+    //juce::dsp::stateVariableTPTFilter<float> filter;
+    
+//    juce::dsp::ProcessorDuplicator<
+//        juce::dsp::StateVariableFilter::Filter<double>,
+//        juce::dsp::StateVariableFilter::Parameters<double>
+//    > stateVariableFilter;
+//    
+//    double lastSampleRate;
+    // END final project gui component code
 };
