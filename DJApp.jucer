@@ -4,6 +4,12 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="FJSq05" name="DJApp">
     <GROUP id="{4CD98E31-0A36-FE1F-2960-627B1C06883A}" name="Source">
+      <FILE id="u79ITj" name="PassFilterEditor.cpp" compile="1" resource="0"
+            file="Source/PassFilterEditor.cpp"/>
+      <FILE id="vKZqbC" name="PassFilterEditor.h" compile="0" resource="0"
+            file="Source/PassFilterEditor.h"/>
+      <FILE id="Q4MU5h" name="PassFilter.cpp" compile="1" resource="0" file="Source/PassFilter.cpp"/>
+      <FILE id="wLtez6" name="PassFilter.h" compile="0" resource="0" file="Source/PassFilter.h"/>
       <FILE id="mEN4JC" name="PlaylistComponent.cpp" compile="1" resource="0"
             file="Source/PlaylistComponent.cpp"/>
       <FILE id="Oivkqe" name="PlaylistComponent.h" compile="0" resource="0"

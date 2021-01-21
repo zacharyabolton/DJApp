@@ -17,7 +17,7 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
                  juce::AudioThumbnailCache& cacheToUse)
     : player(_player),
     waveformDisplay(formatManagerToUse, cacheToUse)
-{
+{    
     addAndMakeVisible(playButton);
     addAndMakeVisible(stopButton);
     addAndMakeVisible(loadButton);
@@ -26,11 +26,6 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     addAndMakeVisible(posSlider);
     addAndMakeVisible(waveformDisplay);
     
-    // final project gui component code
-    addAndMakeVisible(freqDial);
-    addAndMakeVisible(resDial);
-    // END final project gui component code
-    
     playButton.addListener(this);
     stopButton.addListener(this);
     loadButton.addListener(this);
@@ -38,28 +33,9 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     speedSlider.addListener(this);
     posSlider.addListener(this);
     
-    // final project gui component code
-    freqDial.addListener(this);
-    resDial.addListener(this);
-    // END final project gui component code
-    
     volSlider.setRange(0.0, 1.0);
     speedSlider.setRange(0.1, 100.0);
     posSlider.setRange(0.0, 1.0);
-    
-    // final project gui component code
-    freqDial.setRange(20.0f, 20000.0f);
-    freqDial.setValue(600.0f);
-    resDial.setRange(1.0f, 5.0f);
-    resDial.setValue(2.0f);
-    
-    freqDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    resDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    
-    freqDial.setSkewFactorFromMidPoint(1000.0f);
-    
-    player->updateFilter(freqDial.getValue(), resDial.getValue());
-    // END final project gui component code
 
     startTimer(100);
 }
@@ -94,14 +70,6 @@ void DeckGUI::resized()
     stopButton.setBounds(0, rowH, getWidth() / 2, rowH);
     volSlider.setBounds(0, rowH * 2, getWidth() / 2, rowH);
     speedSlider.setBounds(0, rowH * 3, getWidth() / 2, rowH);
-    
-    // final project gui component code
-    freqDial.setTextBoxStyle(juce::Slider::TextBoxAbove, true, getWidth() / 2 * 0.4, 20);
-    resDial.setTextBoxStyle(juce::Slider::TextBoxAbove, true, getWidth() / 2 * 0.4, 20);
-    
-    freqDial.setBounds(getWidth() / 2, 0, getWidth() / 2, getHeight() / 2);
-    resDial.setBounds(getWidth() / 2, getHeight() / 2, getWidth() / 2, getHeight() / 2);
-    // END final project gui component code
     
     posSlider.setBounds(0, rowH * 4, getWidth() / 2, rowH);
     waveformDisplay.setBounds(0, rowH * 5, getWidth() / 2, rowH * 2);
@@ -148,13 +116,6 @@ void DeckGUI::sliderValueChanged(juce::Slider* slider)
     {
         player->setPositionRelative(slider->getValue());
     }
-    // final project gui component code
-    if (slider == &freqDial || slider == &resDial)
-    {
-        DBG("DeckGUI::sliderValueChanged freqDial changed to " << slider->getValue());
-        player->updateFilter(freqDial.getValue(), resDial.getValue());
-    }
-    // END final project gui component code
 }
 
 bool DeckGUI::isInterestedInFileDrag(const juce::StringArray &files)
@@ -176,6 +137,5 @@ void DeckGUI::filesDropped(const juce::StringArray& files, int x, int y)
 
 void DeckGUI::timerCallback()
 {
-//    DBG("DeckGUI::timerCallback");
     waveformDisplay.setPositionRelative(player->getPositionRelative());
 }

@@ -54,15 +54,13 @@ private:
     juce::Slider speedSlider;
     juce::Slider posSlider;
     
-    // final project gui component code
-    // dials for the pass filter
-    juce::Slider freqDial;
-    juce::Slider resDial;
-    // END final project gui component code
-    
     DJAudioPlayer* player;
     
     WaveformDisplay waveformDisplay;
+    
+    // Final Project GUI Component Code
+    
+    // END Final Project GUI Component Code
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DeckGUI)
 };
