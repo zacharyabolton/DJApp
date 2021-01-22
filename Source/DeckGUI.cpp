@@ -16,8 +16,9 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
                  juce::AudioFormatManager& formatManagerToUse,
                  juce::AudioThumbnailCache& cacheToUse)
     : player(_player),
-    waveformDisplay(formatManagerToUse, cacheToUse)
-{    
+    waveformDisplay(formatManagerToUse, cacheToUse),
+    passFilterEditor(passFilter, 400, 400)
+{
     addAndMakeVisible(playButton);
     addAndMakeVisible(stopButton);
     addAndMakeVisible(loadButton);
@@ -25,6 +26,8 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     addAndMakeVisible(speedSlider);
     addAndMakeVisible(posSlider);
     addAndMakeVisible(waveformDisplay);
+    
+    addAndMakeVisible(passFilterEditor);
     
     playButton.addListener(this);
     stopButton.addListener(this);
@@ -65,7 +68,12 @@ void DeckGUI::paint (juce::Graphics& g)
 
 void DeckGUI::resized()
 {
+    // Final GUI Component Code
+    passFilterEditor.setBounds(getWidth() / 2, 0, getWidth() / 2, getHeight());
+    // END Final GUI Component Code
+    
     double rowH = getHeight() / 8;
+    
     playButton.setBounds(0, 0, getWidth() / 2, rowH);
     stopButton.setBounds(0, rowH, getWidth() / 2, rowH);
     volSlider.setBounds(0, rowH * 2, getWidth() / 2, rowH);

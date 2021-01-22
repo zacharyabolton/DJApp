@@ -11,6 +11,7 @@
 #pragma once
 
 #include "JuceHeader.h"
+#include "PassFilter.h"
 
 class DJAudioPlayer :   public juce::AudioSource
 {
@@ -53,14 +54,10 @@ public:
     
     /** get the relative position of the playhead */
     double getPositionRelative() const;
-    
+
 private:
     juce::AudioFormatManager& formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::AudioTransportSource transportSource;
     juce::ResamplingAudioSource resampleSource{&transportSource, false, 2};
-    
-    // Final Project GUI Component Code
-    
-    // END Final Project GUI Component Code
 };

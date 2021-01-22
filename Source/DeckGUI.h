@@ -13,6 +13,8 @@
 #include <JuceHeader.h>
 #include "DJAudioPlayer.h"
 #include "WaveformDisplay.h"
+#include "PassFilterEditor.h"
+#include "PassFilter.h"
 
 //==============================================================================
 /*
@@ -58,9 +60,10 @@ private:
     
     WaveformDisplay waveformDisplay;
     
-    // Final Project GUI Component Code
-    
-    // END Final Project GUI Component Code
+    // Final GUI Component Code
+    PassFilter passFilter;
+    PassFilterEditor passFilterEditor;
+    // END Final GUI Component Code
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DeckGUI)
 };
