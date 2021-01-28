@@ -16,8 +16,7 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
                  juce::AudioFormatManager& formatManagerToUse,
                  juce::AudioThumbnailCache& cacheToUse)
     : player(_player),
-    waveformDisplay(formatManagerToUse, cacheToUse),
-    passFilterEditor(passFilter, 400, 400)
+    waveformDisplay(formatManagerToUse, cacheToUse)
 {
     addAndMakeVisible(playButton);
     addAndMakeVisible(stopButton);
@@ -27,7 +26,23 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     addAndMakeVisible(posSlider);
     addAndMakeVisible(waveformDisplay);
     
-    addAndMakeVisible(passFilterEditor);
+    // Final GUI Component Code
+    freqDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
+    resDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
+    
+    addAndMakeVisible(freqDial);
+    addAndMakeVisible(resDial);
+
+    freqDial.setRange(20.0f, 20000.0f);
+    freqDial.setValue(600.0f);
+    resDial.setRange(1.0f, 5.0f);
+    resDial.setValue(2.0f);
+    
+    freqDial.setSkewFactorFromMidPoint(1000.0f);
+    
+    freqDial.addListener(this);
+    resDial.addListener(this);
+    // END Final GUI Component Code
     
     playButton.addListener(this);
     stopButton.addListener(this);
@@ -41,6 +56,8 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     posSlider.setRange(0.0, 1.0);
 
     startTimer(100);
+    
+    player->passFilter.updateFilter(freqDial.getValue(), resDial.getValue());
 }
 
 DeckGUI::~DeckGUI()
@@ -64,12 +81,22 @@ void DeckGUI::paint (juce::Graphics& g)
 
     g.setColour (juce::Colours::white);
     g.setFont (14.0f);
+    
+    // Final GUI Component Code
+    g.drawText("Frequency", getWidth() / 2, getHeight() / 4 * 1, getWidth() / 2, 20, juce::Justification::centred);
+    g.drawText("Resonance", getWidth() / 2, getHeight() / 4 * 3, getWidth() / 2, 20, juce::Justification::centred);
+    // END Final GUI Component Code
 }
 
 void DeckGUI::resized()
 {
     // Final GUI Component Code
-    passFilterEditor.setBounds(getWidth() / 2, 0, getWidth() / 2, getHeight());
+//    passFilterEditor.setBounds(getWidth() / 2, 0, getWidth() / 2, getHeight());
+    freqDial.setBounds(getWidth() / 2, 0, getWidth() / 2, getHeight() / 2);
+    resDial.setBounds(getWidth() / 2, getHeight() / 2, getWidth() / 2, getHeight() / 2);
+    
+    freqDial.setTextBoxStyle(juce::Slider::TextBoxAbove, true, getWidth() / 4, 20);
+    resDial.setTextBoxStyle(juce::Slider::TextBoxAbove, true, getWidth() / 4, 20);
     // END Final GUI Component Code
     
     double rowH = getHeight() / 8;
@@ -124,6 +151,14 @@ void DeckGUI::sliderValueChanged(juce::Slider* slider)
     {
         player->setPositionRelative(slider->getValue());
     }
+    // Final GUI Component Code
+    if (slider == &freqDial || slider == &resDial)
+    {
+        DBG("DeckGUI::sliderValueChanged freqDial changed to " << slider->getValue());
+//        player->updateFilter(freqDial.getValue(), resDial.getValue());
+        player->passFilter.updateFilter(freqDial.getValue(), resDial.getValue());
+    }
+    // Final GUI Component Code
 }
 
 bool DeckGUI::isInterestedInFileDrag(const juce::StringArray &files)

@@ -13,7 +13,7 @@
 #include <JuceHeader.h>
 #include "DJAudioPlayer.h"
 #include "WaveformDisplay.h"
-#include "PassFilterEditor.h"
+//#include "PassFilterEditor.h"
 #include "PassFilter.h"
 
 //==============================================================================
@@ -61,8 +61,10 @@ private:
     WaveformDisplay waveformDisplay;
     
     // Final GUI Component Code
-    PassFilter passFilter;
-    PassFilterEditor passFilterEditor;
+//    PassFilterEditor passFilterEditor;
+    // dials for the pass filter
+    juce::Slider freqDial;
+    juce::Slider resDial;
     // END Final GUI Component Code
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DeckGUI)

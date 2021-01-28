@@ -55,7 +55,11 @@ public:
     /** get the relative position of the playhead */
     double getPositionRelative() const;
 
+    // Final GUI Component Code
+    PassFilter passFilter;
+    // END Final GUI Component Code
 private:
+    
     juce::AudioFormatManager& formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::AudioTransportSource transportSource;

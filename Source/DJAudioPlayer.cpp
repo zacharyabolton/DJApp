@@ -23,17 +23,20 @@ DJAudioPlayer::~DJAudioPlayer()
 
 void DJAudioPlayer::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
+//    passFilter.prepareToPlay(sampleRate, samplesPerBlockExpected);
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
     resampleSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void DJAudioPlayer::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
+//    passFilter.getNextAudioBlock(bufferToFill);
     resampleSource.getNextAudioBlock(bufferToFill);
 }
 
 void DJAudioPlayer::releaseResources()
 {
+//    passFilter.releaseResources();
     transportSource.releaseResources();
     resampleSource.releaseResources();
 }
