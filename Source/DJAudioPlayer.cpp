@@ -23,15 +23,37 @@ void DJAudioPlayer::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 {
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
     resampleSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    prepareToPlay(sampleRate, samplesPerBlockExpected);
+    // Final GUI Component Code
+    juce::dsp::ProcessSpec spec;
+    spec.maximumBlockSize = samplesPerBlockExpected;
+    spec.sampleRate = sampleRate;
+//    DBG("DJAudioPlayer::prepareToPlay getTotalNumOutputChannels() = " << getTotalNumOutputChannels());
+//    spec.numChannels = getTotalNumOutputChannels();
+    spec.numChannels = 2;
+
+    filter.prepare(spec);
+
+    filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass); // unsure
+
+    reset();
+
+    // END Final GUI Component Code
 }
 
 void DJAudioPlayer::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
     resampleSource.getNextAudioBlock(bufferToFill);
-    juce::MidiBuffer testMidiBuffer;
-    juce::AudioBuffer<float>* bufferToFilter{bufferToFill.buffer};
-    processBlock(bufferToFilter, testMidiBuffer);
+    
+    filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+    filter.setCutoffFrequency(150.0f);
+    
+    juce::dsp::AudioBlock<float> audioBlock(bufferToFill.buffer->getArrayOfWritePointers(),
+                                       bufferToFill.buffer->getNumChannels(),
+                                       bufferToFill.startSample,
+                                       bufferToFill.numSamples);
+    auto context = juce::dsp::ProcessContextReplacing<float> (audioBlock);
+    
+    filter.process(context);
 }
 
 void DJAudioPlayer::loadURL(juce::URL audioURL)
@@ -107,22 +129,22 @@ double DJAudioPlayer::getPositionRelative() const
 
 void DJAudioPlayer::prepareToPlay (double sampleRate, int samplesPerBlockExpected)
 {
-    // Final GUI Component Code
-    DBG("DJAudioPlayer::prepareToPlay");
-    juce::dsp::ProcessSpec spec;
-    spec.maximumBlockSize = samplesPerBlockExpected;
-    spec.sampleRate = sampleRate;
-//    DBG("DJAudioPlayer::prepareToPlay getTotalNumOutputChannels() = " << getTotalNumOutputChannels());
-//    spec.numChannels = getTotalNumOutputChannels();
-    spec.numChannels = 2;
-
-    filter.prepare(spec);
-
-    filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass); // unsure
-
-    reset();
-
-    // END Final GUI Component Code
+//    // Final GUI Component Code
+//    DBG("DJAudioPlayer::prepareToPlay");
+//    juce::dsp::ProcessSpec spec;
+//    spec.maximumBlockSize = samplesPerBlockExpected;
+//    spec.sampleRate = sampleRate;
+////    DBG("DJAudioPlayer::prepareToPlay getTotalNumOutputChannels() = " << getTotalNumOutputChannels());
+////    spec.numChannels = getTotalNumOutputChannels();
+//    spec.numChannels = 2;
+//
+//    filter.prepare(spec);
+//
+//    filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass); // unsure
+//
+//    reset();
+//
+//    // END Final GUI Component Code
 }
 
 void DJAudioPlayer::releaseResources()
