@@ -13,8 +13,6 @@
 #include <JuceHeader.h>
 #include "DJAudioPlayer.h"
 #include "WaveformDisplay.h"
-//#include "PassFilterEditor.h"
-#include "PassFilter.h"
 
 //==============================================================================
 /*
@@ -61,7 +59,6 @@ private:
     WaveformDisplay waveformDisplay;
     
     // Final GUI Component Code
-//    PassFilterEditor passFilterEditor;
     // dials for the pass filter
     juce::Slider freqDial;
     juce::Slider resDial;

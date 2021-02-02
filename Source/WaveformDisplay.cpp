@@ -73,22 +73,22 @@ void WaveformDisplay::resized()
 
 void WaveformDisplay::loadURL(juce::URL audioURL)
 {
-    DBG("wfd: loadURL");
+//    DBG("wfd: loadURL");
     audioThumb.clear();
     fileLoaded = audioThumb.setSource(new juce::URLInputSource(audioURL));
     if (fileLoaded)
     {
-        DBG("wfd: loaded!");
+//        DBG("wfd: loaded!");
     }
     else {
-        DBG("wfd: not loaded!");
+//        DBG("wfd: not loaded!");
     }
     
 }
 
 void WaveformDisplay::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
-    DBG("wfd: change recieved");
+//    DBG("wfd: change recieved");
     
     repaint();
 }
