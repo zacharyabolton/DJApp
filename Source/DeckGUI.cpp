@@ -34,9 +34,9 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     addAndMakeVisible(resDial);
 
     freqDial.setRange(20.0f, 20000.0f);
-    freqDial.setValue(600.0f);
+    freqDial.setValue(20.0f);
     resDial.setRange(1.0f, 5.0f);
-    resDial.setValue(2.0f);
+    resDial.setValue(1.0f);
     
     freqDial.setSkewFactorFromMidPoint(1000.0f);
     
@@ -57,7 +57,7 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
 
     startTimer(100);
     
-//    player->passFilter.updateFilter(freqDial.getValue(), resDial.getValue());
+    player->updateFilter(freqDial.getValue(), resDial.getValue());
 }
 
 DeckGUI::~DeckGUI()
@@ -115,17 +115,14 @@ void DeckGUI::buttonClicked(juce::Button* button)
 {
     if (button == &playButton)
     {
-//        DBG("Play button was clicked");
         player->start();
     }
     if (button == &stopButton)
     {
-//        DBG("Stop button was clicked ");
         player->stop();
     }
     if (button == &loadButton)
     {
-//        DBG("Load button was clicked");
         juce::FileChooser chooser{"Select a file..."};
         if (chooser.browseForFileToOpen())
         {
@@ -152,16 +149,13 @@ void DeckGUI::sliderValueChanged(juce::Slider* slider)
     // Final GUI Component Code
     if (slider == &freqDial || slider == &resDial)
     {
-//        DBG("DeckGUI::sliderValueChanged freqDial changed to " << slider->getValue());
-//        player->updateFilter(freqDial.getValue(), resDial.getValue());
-//        player->passFilter.updateFilter(freqDial.getValue(), resDial.getValue());
+        player->updateFilter(freqDial.getValue(), resDial.getValue());
     }
     // Final GUI Component Code
 }
 
 bool DeckGUI::isInterestedInFileDrag(const juce::StringArray &files)
 {
-//    DBG("DeckGUI::isInterestedInFileDrag");
     return true;
 }
 
@@ -169,7 +163,6 @@ void DeckGUI::filesDropped(const juce::StringArray& files, int x, int y)
 {
     for (juce::String filename : files)
     {
-//        DBG("DeckGUI::filesDropped " << filename );
         juce::URL fileURL = juce::URL{juce::File{filename}};
         player->loadURL(fileURL);
         waveformDisplay.loadURL(fileURL);
