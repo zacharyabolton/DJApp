@@ -51,7 +51,7 @@ public:
     void stop();
     /** get the relative position of the playhead */
     double getPositionRelative() const;
-    
+
     // Final GUI Component Code
 
     /** update the state of the filter as the user changes parameters */

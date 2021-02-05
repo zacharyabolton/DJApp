@@ -34,9 +34,12 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     addAndMakeVisible(resDial);
 
     freqDial.setRange(20.0f, 20000.0f);
+    freqDial.setTextValueSuffix("Hz");
+    freqDial.setNumDecimalPlacesToDisplay(2);
     freqDial.setValue(20.0f);
-    resDial.setRange(1.0f, 5.0f);
-    resDial.setValue(1.0f);
+    resDial.setRange(0.3f, 20.0f);
+    resDial.setValue(0.71f);
+    resDial.setNumDecimalPlacesToDisplay(2);
     
     freqDial.setSkewFactorFromMidPoint(1000.0f);
     
@@ -52,8 +55,14 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     posSlider.addListener(this);
     
     volSlider.setRange(0.0, 1.0);
-    speedSlider.setRange(0.1, 100.0);
+    volSlider.setValue(1.0);
+    volSlider.setNumDecimalPlacesToDisplay(2);
+    speedSlider.setRange(0.1, 2.0);
+    speedSlider.setNumDecimalPlacesToDisplay(2);
+    speedSlider.setValue(1.0);
+    speedSlider.setTextValueSuffix("x");
     posSlider.setRange(0.0, 1.0);
+    posSlider.setNumDecimalPlacesToDisplay(2);
 
     startTimer(100);
     
@@ -83,8 +92,8 @@ void DeckGUI::paint (juce::Graphics& g)
     g.setFont (14.0f);
     
     // Final GUI Component Code
-    g.drawText("Frequency", getWidth() / 2, getHeight() / 4 * 1, getWidth() / 2, 20, juce::Justification::centred);
-    g.drawText("Resonance", getWidth() / 2, getHeight() / 4 * 3, getWidth() / 2, 20, juce::Justification::centred);
+    freqDial.setLookAndFeel(&freqDialLookAndFeel);
+    resDial.setLookAndFeel(&resDialLookAndFeel);
     // END Final GUI Component Code
 }
 

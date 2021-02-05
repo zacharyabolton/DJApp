@@ -4,6 +4,10 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="FJSq05" name="DJApp">
     <GROUP id="{4CD98E31-0A36-FE1F-2960-627B1C06883A}" name="Source">
+      <FILE id="TjwPZl" name="RotaryDialLookAndFeel.cpp" compile="1" resource="0"
+            file="Source/RotaryDialLookAndFeel.cpp"/>
+      <FILE id="hVytEB" name="RotaryDialLookAndFeel.h" compile="0" resource="0"
+            file="Source/RotaryDialLookAndFeel.h"/>
       <FILE id="mEN4JC" name="PlaylistComponent.cpp" compile="1" resource="0"
             file="Source/PlaylistComponent.cpp"/>
       <FILE id="Oivkqe" name="PlaylistComponent.h" compile="0" resource="0"

@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "DJAudioPlayer.h"
 #include "WaveformDisplay.h"
+#include "RotaryDialLookAndFeel.h"
 
 //==============================================================================
 /*
@@ -60,6 +61,9 @@ private:
     
     // Final GUI Component Code
     // dials for the pass filter
+    RotaryDialLookAndFeel freqDialLookAndFeel{"Cutoff"};
+    RotaryDialLookAndFeel resDialLookAndFeel{"Resonance"};
+    
     juce::Slider freqDial;
     juce::Slider resDial;
     // END Final GUI Component Code
