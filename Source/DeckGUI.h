@@ -44,6 +44,8 @@ public:
     void filesDropped(const juce::StringArray &files, int x, int y) override;
     
     void timerCallback() override;
+    
+    WaveformDisplay waveformDisplay;
 
 private:
     
@@ -56,8 +58,6 @@ private:
     juce::Slider posSlider;
     
     DJAudioPlayer* player;
-    
-    WaveformDisplay waveformDisplay;
     
     // Final GUI Component Code
     // dials for the pass filter

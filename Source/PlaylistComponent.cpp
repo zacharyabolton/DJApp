@@ -12,7 +12,15 @@
 #include "PlaylistComponent.h"
 
 //==============================================================================
-PlaylistComponent::PlaylistComponent()
+PlaylistComponent::PlaylistComponent(DJAudioPlayer* _player1,
+                                     DJAudioPlayer* _player2,
+                                     WaveformDisplay* _waveFormDisplay1,
+                                     WaveformDisplay* _waveFormDisplay2
+                                     )
+    : player1(_player1),
+    player2(_player2),
+    waveformDisplay1(_waveFormDisplay1),
+    waveformDisplay2(_waveFormDisplay2)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -30,6 +38,12 @@ PlaylistComponent::PlaylistComponent()
     tableComponent.setModel(this);
     
     addAndMakeVisible(tableComponent);
+    
+    // Final Music Library Code
+    addAndMakeVisible(loadButton);
+    loadButton.addListener(this);
+    loadButton.setComponentID("0");
+    // END Final Music Library Code
 }
 
 PlaylistComponent::~PlaylistComponent()
@@ -60,7 +74,13 @@ void PlaylistComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    tableComponent.setBounds(0, 0, getWidth(), getHeight());
+    
+    // Final Music Library Code
+    double rowH = getHeight() / 10;
+    loadButton.setBounds(0, rowH * 0, getWidth(), rowH * 1);
+    // END Final Music Library Code
+    
+    tableComponent.setBounds(0, rowH * 1, getWidth(), rowH * 11);
 }
 
 int PlaylistComponent::getNumRows()
@@ -125,5 +145,46 @@ juce::Component* PlaylistComponent::refreshComponentForCell(int rowNumber,
 void PlaylistComponent::buttonClicked(juce::Button* button)
 {
     int id = std::stoi(button->getComponentID().toStdString());
-//    DBG("PlaylistComponent::buttonClicked " << trackTitles[id]);
+
+    if (button == &loadButton)
+    {
+        juce::FileChooser chooser{"Select a file..."};
+        if (chooser.browseForFileToOpen())
+        {
+            auto result = chooser.getResult();
+            DBG(result.getFileNameWithoutExtension());
+            auto url = juce::URL{result};
+            
+            player1->loadURL(url);
+            player2->loadURL(url);
+            waveformDisplay1->loadURL(url);
+            waveformDisplay2->loadURL(url);
+            
+            
+        }
+    }
 }
+
+// Final Music Library Code
+
+bool PlaylistComponent::isInterestedInFileDrag(const juce::StringArray &files)
+{
+    DBG("PlaylistComponent::isInterestedInFileDrag");
+    return true;
+}
+
+void PlaylistComponent::filesDropped(const juce::StringArray& files, int x, int y)
+{
+    DBG("PlaylistComponent::filesDropped");
+    for (juce::String filename : files)
+    {
+        juce::URL fileURL = juce::URL{juce::File{filename}};
+        player1->loadURL(fileURL);
+        player2->loadURL(fileURL);
+        waveformDisplay1->loadURL(fileURL);
+        waveformDisplay2->loadURL(fileURL);
+        return;
+    }
+}
+
+// END Final Music Library Code

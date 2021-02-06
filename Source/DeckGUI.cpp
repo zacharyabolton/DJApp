@@ -176,7 +176,8 @@ void DeckGUI::filesDropped(const juce::StringArray& files, int x, int y)
         player->loadURL(fileURL);
         waveformDisplay.loadURL(fileURL);
         return;
-} }
+    }
+}
 
 void DeckGUI::timerCallback()
 {
