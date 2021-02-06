@@ -15,8 +15,8 @@
 DeckGUI::DeckGUI(DJAudioPlayer* _player,
                  juce::AudioFormatManager& formatManagerToUse,
                  juce::AudioThumbnailCache& cacheToUse)
-    : player(_player),
-    waveformDisplay(formatManagerToUse, cacheToUse)
+    : waveformDisplay(formatManagerToUse, cacheToUse),
+    player(_player)
 {
     addAndMakeVisible(playButton);
     addAndMakeVisible(stopButton);
@@ -165,18 +165,18 @@ void DeckGUI::sliderValueChanged(juce::Slider* slider)
 
 bool DeckGUI::isInterestedInFileDrag(const juce::StringArray &files)
 {
+    if (files.size() != 1)
+    {
+        return false;
+    }
     return true;
 }
 
 void DeckGUI::filesDropped(const juce::StringArray& files, int x, int y)
 {
-    for (juce::String filename : files)
-    {
-        juce::URL fileURL = juce::URL{juce::File{filename}};
-        player->loadURL(fileURL);
-        waveformDisplay.loadURL(fileURL);
-        return;
-    }
+    juce::URL fileURL = juce::URL{juce::File{files[0]}};
+    player->loadURL(fileURL);
+    waveformDisplay.loadURL(fileURL);
 }
 
 void DeckGUI::timerCallback()

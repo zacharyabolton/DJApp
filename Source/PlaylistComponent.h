@@ -15,6 +15,7 @@
 #include <string>
 #include "DJAudioPlayer.h"
 #include "WaveformDisplay.h"
+#include "Track.h"
 
 //==============================================================================
 /*
@@ -70,7 +71,7 @@ public:
 private:
     
     juce::TableListBox tableComponent;
-    std::vector<std::string> trackTitles;
+    std::vector<Track*> tracks;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaylistComponent)
     
