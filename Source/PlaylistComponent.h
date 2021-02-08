@@ -29,7 +29,8 @@ public:
     PlaylistComponent(DJAudioPlayer* player1,
                       DJAudioPlayer* player2,
                       WaveformDisplay* waveFormDisplay1,
-                      WaveformDisplay* waveFormDisplay2
+                      WaveformDisplay* waveFormDisplay2,
+                      juce::AudioFormatManager& formatManager
                       );
     ~PlaylistComponent() override;
 
@@ -66,12 +67,15 @@ public:
     bool isInterestedInFileDrag(const juce::StringArray &files) override;
     void filesDropped(const juce::StringArray &files, int x, int y) override;
     
+    juce::String getLengthInMinutesAndSeconds(juce::URL audioURL);
+    
     // END Final Music Library Code
 
 private:
     
     juce::TableListBox tableComponent;
-    std::vector<Track*> tracks;
+//    std::vector<Track*> tracks;
+    std::vector<std::unique_ptr<Track>> tracks;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaylistComponent)
     
@@ -84,5 +88,9 @@ private:
     juce::TextButton loadButton{"LOAD"};
     
     bool fileLoaded;
+    
+    juce::AudioFormatManager& formatManager;
+    std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
+    juce::AudioTransportSource transportSource;
     // END Final Music Library Code
 };

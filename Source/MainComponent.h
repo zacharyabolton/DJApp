@@ -40,7 +40,7 @@ private:
     
     juce::MixerAudioSource mixerSource;
     
-    PlaylistComponent playlistComponent{&player1, &player2, &deckGUI1.waveformDisplay, &deckGUI2.waveformDisplay};
+    PlaylistComponent playlistComponent{&player1, &player2, &deckGUI1.waveformDisplay, &deckGUI2.waveformDisplay, formatManager};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
     

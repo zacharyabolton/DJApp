@@ -11,17 +11,22 @@
 #include <JuceHeader.h>
 #include "PlaylistComponent.h"
 #include "Track.h"
+#include <string>
+#include <iomanip>
+#include <iostream>
 
 //==============================================================================
 PlaylistComponent::PlaylistComponent(DJAudioPlayer* _player1,
                                      DJAudioPlayer* _player2,
                                      WaveformDisplay* _waveFormDisplay1,
-                                     WaveformDisplay* _waveFormDisplay2
+                                     WaveformDisplay* _waveFormDisplay2,
+                                     juce::AudioFormatManager& _formatManager
                                      )
     : player1(_player1),
     player2(_player2),
     waveformDisplay1(_waveFormDisplay1),
-    waveformDisplay2(_waveFormDisplay2)
+    waveformDisplay2(_waveFormDisplay2),
+    formatManager(_formatManager)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -124,6 +129,17 @@ void PlaylistComponent::paintCell(juce::Graphics& g,
                    true
                    );
     }
+    if (columnId == 2)
+    {
+        g.drawText(tracks[rowNumber]->getLength(),
+                   2,
+                   0,
+                   width - 4,
+                   height,
+                   juce::Justification::centredLeft,
+                   false
+                   );
+    }
 }
 
 juce::Component* PlaylistComponent::refreshComponentForCell(int rowNumber,
@@ -136,21 +152,13 @@ juce::Component* PlaylistComponent::refreshComponentForCell(int rowNumber,
     {
         if (existingComponentToUpdate == nullptr)
         {
-            if (columnId == 5)
-            {
-                juce::TextButton* btn = new juce::TextButton{"x"};
-                juce::String id{std::to_string(rowNumber)};
-                btn->setComponentID(id);
-                btn->addListener(this);
-                existingComponentToUpdate = btn;
-            }
-            else {
-                juce::TextButton* btn = new juce::TextButton{"play"};
-                juce::String id{std::to_string(rowNumber)};
-                btn->setComponentID(id);
-                btn->addListener(this);
-                existingComponentToUpdate = btn;
-            }
+            //                juce::TextButton* btn = new juce::TextButton{"x"};
+            //                juce::String id{std::to_string(rowNumber)};
+            //                btn->setComponentID(id);
+            //                btn->addListener(this);
+            //                existingComponentToUpdate = btn;
+            juce::TextButton* btn = tracks[rowNumber]->getButtons()[columnId - 3];
+            existingComponentToUpdate = btn;
         }
     }
     return existingComponentToUpdate;
@@ -167,9 +175,11 @@ void PlaylistComponent::buttonClicked(juce::Button* button)
         if (chooser.browseForFileToOpen())
         {
             auto result = chooser.getResult();
-            Track* track = new Track{result.getFileNameWithoutExtension(), 100.0f};
-            tracks.push_back(track);
             auto url = juce::URL{result};
+            
+//            Track* track = new Track{result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url, this};
+            std::unique_ptr<Track> track(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url, this));
+            tracks.push_back(std::move(track));
             
             player1->loadURL(url);
             player2->loadURL(url);
@@ -209,9 +219,12 @@ void PlaylistComponent::filesDropped(const juce::StringArray& files, int x, int 
     for (juce::String filename : files)
     {
         auto result = juce::File{filename};
-        Track* track = new Track{result.getFileNameWithoutExtension(), 100.0f};
-        tracks.push_back(track);
         auto url = juce::URL{result};
+        
+//        Track* track = new Track{result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url, this};
+        std::unique_ptr<Track> track(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url, this));
+        tracks.push_back(std::move(track));
+        
         player1->loadURL(url);
         player2->loadURL(url);
         waveformDisplay1->loadURL(url);
@@ -220,6 +233,31 @@ void PlaylistComponent::filesDropped(const juce::StringArray& files, int x, int 
         resized();
         tableComponent.resized();
     }
+}
+
+juce::String PlaylistComponent::getLengthInMinutesAndSeconds(juce::URL audioURL)
+{
+    auto* reader = formatManager.createReaderFor(audioURL.createInputStream(false));
+    if (reader != nullptr) // good file!
+    {
+        std::unique_ptr<juce::AudioFormatReaderSource> newSource(new juce::AudioFormatReaderSource(reader, true));
+        transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
+        readerSource.reset(newSource.release());
+    }
+    DBG("PlaylistComponent::getLengthInMinutesAndSeconds: " << transportSource.getLengthInSeconds());
+    int mins = floor(transportSource.getLengthInSeconds() / 60);
+    int secs = floor(static_cast<int>(transportSource.getLengthInSeconds()) % 60);
+    
+    juce::String length = std::to_string(mins) + ":";
+    
+    if (secs < 10)
+    {
+        length = length + "0" + std::to_string(secs);
+    }
+    else {
+        length = length + std::to_string(secs);
+    }
+    return length;
 }
 
 // END Final Music Library Code
