@@ -69,12 +69,14 @@ public:
     
     juce::String getLengthInMinutesAndSeconds(juce::URL audioURL);
     
+    void addTrack(juce::File result);
+    void removeTrack(int trackNum);
+    
     // END Final Music Library Code
 
 private:
     
     juce::TableListBox tableComponent;
-//    std::vector<Track*> tracks;
     std::vector<std::unique_ptr<Track>> tracks;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaylistComponent)

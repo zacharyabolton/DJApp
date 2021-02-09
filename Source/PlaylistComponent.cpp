@@ -14,6 +14,7 @@
 #include <string>
 #include <iomanip>
 #include <iostream>
+#include <stdlib.h>
 
 //==============================================================================
 PlaylistComponent::PlaylistComponent(DJAudioPlayer* _player1,
@@ -148,16 +149,31 @@ juce::Component* PlaylistComponent::refreshComponentForCell(int rowNumber,
                                          Component *existingComponentToUpdate
                                          )
 {
-    if (columnId >= 3 && columnId <= 5)
+
+    if (existingComponentToUpdate == nullptr)
     {
-        if (existingComponentToUpdate == nullptr)
+        if (columnId == 3)
         {
-            //                juce::TextButton* btn = new juce::TextButton{"x"};
-            //                juce::String id{std::to_string(rowNumber)};
-            //                btn->setComponentID(id);
-            //                btn->addListener(this);
-            //                existingComponentToUpdate = btn;
-            juce::TextButton* btn = tracks[rowNumber]->getButtons()[columnId - 3];
+            juce::TextButton* btn = new juce::TextButton{"play left"};
+            juce::String id{std::to_string(rowNumber * 3 + 0)};
+            btn->setComponentID(id);
+            btn->addListener(this);
+            existingComponentToUpdate = btn;
+        }
+        if (columnId == 4)
+        {
+            juce::TextButton* btn = new juce::TextButton{"play right"};
+            juce::String id{std::to_string(rowNumber * 3 + 1)};
+            btn->setComponentID(id);
+            btn->addListener(this);
+            existingComponentToUpdate = btn;
+        }
+        if (columnId == 5)
+        {
+            juce::TextButton* btn = new juce::TextButton{"x"};
+            juce::String id{std::to_string(rowNumber * 3 + 2)};
+            btn->setComponentID(id);
+            btn->addListener(this);
             existingComponentToUpdate = btn;
         }
     }
@@ -168,26 +184,30 @@ void PlaylistComponent::buttonClicked(juce::Button* button)
 {
     // Final Music Library Code
     int id = std::stoi(button->getComponentID().toStdString());
-
+    DBG("button clicked. id = " << id);
+    if (id % 3 == 0)
+    {
+        juce::URL url = tracks[static_cast<int>(id / 3)]->getURL();
+        player1->loadURL(url);
+        waveformDisplay1->loadURL(url);
+    }
+    if (id % 3 == 1)
+    {
+        juce::URL url = tracks[static_cast<int>(id / 3)]->getURL();
+        player2->loadURL(url);
+        waveformDisplay2->loadURL(url);
+    }
+    if (id % 3 == 2)
+    {
+        removeTrack(static_cast<int>(id / 3));
+    }
     if (button == &loadButton)
     {
         juce::FileChooser chooser{"Select a file...", juce::File::getSpecialLocation(juce::File::userMusicDirectory), "*.wav, *.m4a, *.mp3"};
         if (chooser.browseForFileToOpen())
         {
             auto result = chooser.getResult();
-            auto url = juce::URL{result};
-            
-//            Track* track = new Track{result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url, this};
-            std::unique_ptr<Track> track(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url, this));
-            tracks.push_back(std::move(track));
-            
-            player1->loadURL(url);
-            player2->loadURL(url);
-            waveformDisplay1->loadURL(url);
-            waveformDisplay2->loadURL(url);
-            
-            resized();
-            tableComponent.resized();
+            addTrack(result);
         }
     }
     // END Final Music Library Code
@@ -219,19 +239,7 @@ void PlaylistComponent::filesDropped(const juce::StringArray& files, int x, int 
     for (juce::String filename : files)
     {
         auto result = juce::File{filename};
-        auto url = juce::URL{result};
-        
-//        Track* track = new Track{result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url, this};
-        std::unique_ptr<Track> track(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url, this));
-        tracks.push_back(std::move(track));
-        
-        player1->loadURL(url);
-        player2->loadURL(url);
-        waveformDisplay1->loadURL(url);
-        waveformDisplay2->loadURL(url);
-
-        resized();
-        tableComponent.resized();
+        addTrack(result);
     }
 }
 
@@ -258,6 +266,24 @@ juce::String PlaylistComponent::getLengthInMinutesAndSeconds(juce::URL audioURL)
         length = length + std::to_string(secs);
     }
     return length;
+}
+
+void PlaylistComponent::addTrack(juce::File result)
+{
+    auto url = juce::URL{result};
+
+    std::unique_ptr<Track> track(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url));
+    tracks.push_back(std::move(track));
+    
+    resized();
+    tableComponent.resized();
+}
+
+void PlaylistComponent::removeTrack(int trackNum)
+{
+    tracks.erase(tracks.begin() + trackNum);
+    resized();
+    tableComponent.resized();
 }
 
 // END Final Music Library Code

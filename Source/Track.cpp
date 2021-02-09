@@ -12,12 +12,10 @@
 
 Track::Track(juce::String _name,
              juce::String _length,
-             juce::URL _url,
-             juce::Button::Listener* _listener)
+             juce::URL _url)
     : name(_name),
     length(_length),
-    url(_url),
-    listener(_listener)
+    url(_url)
 {
 }
 
@@ -38,13 +36,4 @@ juce::String Track::getLength()
 juce::URL Track::getURL()
 {
     return url;
-}
-
-std::vector<juce::TextButton*> Track::getButtons()
-{
-    std::vector<juce::TextButton*> buttons;
-    buttons.push_back(&playLeft);
-    buttons.push_back(&playRight);
-    buttons.push_back(&remove);
-    return buttons;
 }
