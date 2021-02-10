@@ -21,7 +21,6 @@
 class DeckGUI  : public juce::Component,
                  public juce::Button::Listener,
                  public juce::Slider::Listener,
-                 public juce::FileDragAndDropTarget,
                  public juce::Timer
 {
 public:
@@ -39,10 +38,6 @@ public:
     /** Impliment Slider::Listener */
     void sliderValueChanged(juce::Slider* slider) override;
     
-    /** Impliment FileDragAndDropTarget */
-    bool isInterestedInFileDrag(const juce::StringArray &files) override;
-    void filesDropped(const juce::StringArray &files, int x, int y) override;
-    
     void timerCallback() override;
     
     WaveformDisplay waveformDisplay;
@@ -51,7 +46,6 @@ private:
     
     juce::TextButton playButton{"PLAY"};
     juce::TextButton stopButton{"STOP"};
-    juce::TextButton loadButton{"LOAD"};
     
     juce::Slider volSlider;
     juce::Slider speedSlider;

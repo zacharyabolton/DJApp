@@ -55,6 +55,9 @@ void WaveformDisplay::paint (juce::Graphics& g)
         );
         g.setColour(juce::Colours::lightgreen);
         g.drawRect(position * getWidth(), 0, 0.01 * getWidth(), getHeight());
+        g.setColour(juce::Colours::black);
+        g.drawText (currentTrackTitle, getLocalBounds(),
+                    juce::Justification::centred, true);   // draw track title
     }
     else {
         g.setFont (20.0f);
@@ -100,4 +103,14 @@ void WaveformDisplay::setPositionRelative(double pos)
         position = pos;
         repaint();
     }
+}
+
+void WaveformDisplay::setCurrentTrackTitle(juce::String title)
+{
+    currentTrackTitle = title;
+}
+
+juce::String WaveformDisplay::getCurrentTrackTitle()
+{
+    return currentTrackTitle;
 }

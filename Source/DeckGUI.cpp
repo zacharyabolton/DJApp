@@ -20,11 +20,16 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
 {
     addAndMakeVisible(playButton);
     addAndMakeVisible(stopButton);
-    addAndMakeVisible(loadButton);
     addAndMakeVisible(volSlider);
     addAndMakeVisible(speedSlider);
     addAndMakeVisible(posSlider);
     addAndMakeVisible(waveformDisplay);
+    
+    // My default styles
+    getLookAndFeel().setColour(juce::Slider::thumbColourId, juce::Colours::blue);
+    getLookAndFeel().setColour(juce::Slider::trackColourId, juce::Colours::orange);
+    getLookAndFeel().setColour(juce::Slider::backgroundColourId, juce::Colours::darkgrey);
+    getLookAndFeel().setColour(juce::TextButton::buttonColourId, juce::Colours::maroon);
     
     // Final GUI Component Code
     freqDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
@@ -48,21 +53,26 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     // END Final GUI Component Code
     
     playButton.addListener(this);
+    playButton.setColour(juce::TextButton::buttonColourId, juce::Colours::green);
     stopButton.addListener(this);
-    loadButton.addListener(this);
     volSlider.addListener(this);
     speedSlider.addListener(this);
     posSlider.addListener(this);
-    
-    volSlider.setRange(0.0, 1.0);
-    volSlider.setValue(1.0);
-    volSlider.setNumDecimalPlacesToDisplay(2);
+
+    volSlider.setRange(0.0, 100.0);
+    volSlider.setValue(50.0);
+    volSlider.setNumDecimalPlacesToDisplay(0);
+    volSlider.setTextValueSuffix("% Volume");
+    volSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxAbove, true, 100, 20);
     speedSlider.setRange(0.1, 2.0);
     speedSlider.setNumDecimalPlacesToDisplay(2);
     speedSlider.setValue(1.0);
-    speedSlider.setTextValueSuffix("x");
+    speedSlider.setTextValueSuffix("x Speed");
+    speedSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxAbove, true, 100, 20);
     posSlider.setRange(0.0, 1.0);
     posSlider.setNumDecimalPlacesToDisplay(2);
+    posSlider.setTextValueSuffix(" Position");
+    posSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxAbove, true, 100, 20);
 
     startTimer(100);
     
@@ -108,15 +118,18 @@ void DeckGUI::resized()
     // END Final GUI Component Code
     
     double rowH = getHeight() / 8;
+    double spacer = rowH / 3;
     
     playButton.setBounds(0, 0, getWidth() / 2, rowH);
     stopButton.setBounds(0, rowH, getWidth() / 2, rowH);
-    volSlider.setBounds(0, rowH * 2, getWidth() / 2, rowH);
-    speedSlider.setBounds(0, rowH * 3, getWidth() / 2, rowH);
     
-    posSlider.setBounds(0, rowH * 4, getWidth() / 2, rowH);
-    waveformDisplay.setBounds(0, rowH * 5, getWidth() / 2, rowH * 2);
-    loadButton.setBounds(0, rowH * 7, getWidth() / 2, rowH);
+    volSlider.setBounds(0, rowH * 2 + spacer * 1, getWidth() / 2, rowH);
+    
+    speedSlider.setBounds(0, rowH * 3 + spacer * 2, getWidth() / 2, rowH);
+    
+    posSlider.setBounds(0, rowH * 4 + spacer * 3, getWidth() / 2, rowH);
+    
+    waveformDisplay.setBounds(0, rowH * 6, getWidth() / 2, rowH * 2);
 
 }
 
@@ -130,22 +143,13 @@ void DeckGUI::buttonClicked(juce::Button* button)
     {
         player->stop();
     }
-    if (button == &loadButton)
-    {
-        juce::FileChooser chooser{"Select a file..."};
-        if (chooser.browseForFileToOpen())
-        {
-            player->loadURL(juce::URL{chooser.getResult()});
-            waveformDisplay.loadURL(juce::URL{chooser.getResult()});
-        }
-    }
 }
 
 void DeckGUI::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == &volSlider)
     {
-        player->setGain(slider->getValue());
+        player->setGain(slider->getValue() / 100);
     }
     if (slider == &speedSlider)
     {
@@ -161,22 +165,6 @@ void DeckGUI::sliderValueChanged(juce::Slider* slider)
         player->updateFilter(freqDial.getValue(), resDial.getValue());
     }
     // Final GUI Component Code
-}
-
-bool DeckGUI::isInterestedInFileDrag(const juce::StringArray &files)
-{
-    if (files.size() != 1)
-    {
-        return false;
-    }
-    return true;
-}
-
-void DeckGUI::filesDropped(const juce::StringArray& files, int x, int y)
-{
-    juce::URL fileURL = juce::URL{juce::File{files[0]}};
-    player->loadURL(fileURL);
-    waveformDisplay.loadURL(fileURL);
 }
 
 void DeckGUI::timerCallback()

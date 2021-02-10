@@ -20,6 +20,8 @@ MainComponent::MainComponent()
         setAudioChannels (0, 2);
     }
     
+    getLookAndFeel().setColour(juce::ResizableWindow::backgroundColourId, juce::Colours::black);
+    
     addAndMakeVisible(deckGUI1);
     addAndMakeVisible(deckGUI2);
     

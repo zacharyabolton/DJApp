@@ -32,11 +32,17 @@ public:
     
     /** set the relative position of the playhead */
     void setPositionRelative(double pos);
+    
+    /** set the title to be displayed of the track currently playing */
+    void setCurrentTrackTitle(juce::String title);
+    /** get the title to be displayed of the track currently playing */
+    juce::String getCurrentTrackTitle();
 
 private:
     juce::AudioThumbnail audioThumb;
     bool fileLoaded;
     double position;
+    juce::String currentTrackTitle;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveformDisplay)
 };

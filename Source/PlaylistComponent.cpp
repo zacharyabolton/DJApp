@@ -49,6 +49,7 @@ PlaylistComponent::PlaylistComponent(DJAudioPlayer* _player1,
     
     // Final Music Library Code
     addAndMakeVisible(loadButton);
+    loadButton.setColour(juce::TextButton::buttonColourId, juce::Colours::darkorange);
     loadButton.addListener(this);
     loadButton.setComponentID("0");
     // END Final Music Library Code
@@ -74,7 +75,7 @@ void PlaylistComponent::paint (juce::Graphics& g)
 
     g.setColour (juce::Colours::white);
     g.setFont (14.0f);
-    g.drawText ("PlaylistComponent", getLocalBounds(),
+    g.drawText ("Drop files here...", getLocalBounds(),
                 juce::Justification::centred, true);   // draw some placeholder text
 }
 
@@ -86,7 +87,13 @@ void PlaylistComponent::resized()
     // Final Music Library Code
     double rowH = 30;
     loadButton.setBounds(0, rowH * 0, getWidth(), rowH * 1);
-    tableComponent.setBounds(0, rowH * 1, getWidth(), getHeight() - rowH);
+    if (tracks.size() > 0)
+    {
+        tableComponent.setBounds(0, rowH * 1, getWidth(), getHeight() - rowH);
+    }
+    else {
+        tableComponent.setBounds(0, rowH * 1, getWidth(), rowH);
+    }
     // END Final Music Library Code
 }
 
@@ -154,7 +161,7 @@ juce::Component* PlaylistComponent::refreshComponentForCell(int rowNumber,
     {
         if (columnId == 3)
         {
-            juce::TextButton* btn = new juce::TextButton{"play left"};
+            juce::TextButton* btn = new juce::TextButton{"load left"};
             juce::String id{std::to_string(rowNumber * 3 + 0)};
             btn->setComponentID(id);
             btn->addListener(this);
@@ -162,7 +169,7 @@ juce::Component* PlaylistComponent::refreshComponentForCell(int rowNumber,
         }
         if (columnId == 4)
         {
-            juce::TextButton* btn = new juce::TextButton{"play right"};
+            juce::TextButton* btn = new juce::TextButton{"load right"};
             juce::String id{std::to_string(rowNumber * 3 + 1)};
             btn->setComponentID(id);
             btn->addListener(this);
@@ -184,31 +191,36 @@ void PlaylistComponent::buttonClicked(juce::Button* button)
 {
     // Final Music Library Code
     int id = std::stoi(button->getComponentID().toStdString());
-    DBG("button clicked. id = " << id);
-    if (id % 3 == 0)
-    {
-        juce::URL url = tracks[static_cast<int>(id / 3)]->getURL();
-        player1->loadURL(url);
-        waveformDisplay1->loadURL(url);
-    }
-    if (id % 3 == 1)
-    {
-        juce::URL url = tracks[static_cast<int>(id / 3)]->getURL();
-        player2->loadURL(url);
-        waveformDisplay2->loadURL(url);
-    }
-    if (id % 3 == 2)
-    {
-        removeTrack(static_cast<int>(id / 3));
-    }
+    DBG("PlaylistComponent::buttonClicked: button clicked: id = " << id);
     if (button == &loadButton)
     {
-        juce::FileChooser chooser{"Select a file...", juce::File::getSpecialLocation(juce::File::userMusicDirectory), "*.wav, *.m4a, *.mp3"};
+        juce::FileChooser chooser{"Select a file..."};
         if (chooser.browseForFileToOpen())
         {
             auto result = chooser.getResult();
             addTrack(result);
         }
+        return;
+    }
+    if (id % 3 == 0)
+    {
+        juce::URL url = tracks[static_cast<int>(id / 3)]->getURL();
+        juce::String title = tracks[static_cast<int>(id / 3)]->getName();
+        player1->loadURL(url);
+        waveformDisplay1->loadURL(url);
+        waveformDisplay1->setCurrentTrackTitle(title);
+    }
+    if (id % 3 == 1)
+    {
+        juce::URL url = tracks[static_cast<int>(id / 3)]->getURL();
+        juce::String title = tracks[static_cast<int>(id / 3)]->getName();
+        player2->loadURL(url);
+        waveformDisplay2->loadURL(url);
+        waveformDisplay2->setCurrentTrackTitle(title);
+    }
+    if (id % 3 == 2)
+    {
+        removeTrack(static_cast<int>(id / 3));
     }
     // END Final Music Library Code
 }
