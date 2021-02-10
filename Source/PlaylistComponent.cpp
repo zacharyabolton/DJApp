@@ -44,14 +44,16 @@ PlaylistComponent::PlaylistComponent(DJAudioPlayer* _player1,
                                          5, 30);
     
     tableComponent.setModel(this);
+    tableComponent.setColour(juce::TableListBox::backgroundColourId, juce::Colours::black);
+    tableComponent.getHeader().setColour(juce::TableHeaderComponent::backgroundColourId, juce::Colours::black);
+    tableComponent.getHeader().setColour(juce::TableHeaderComponent::textColourId, juce::Colours::whitesmoke);
     
     addAndMakeVisible(tableComponent);
     
-    // Final Music Library Code
     addAndMakeVisible(loadButton);
+    addAndMakeVisible(searchField);
     loadButton.setColour(juce::TextButton::buttonColourId, juce::Colours::darkorange);
     loadButton.addListener(this);
-    loadButton.setComponentID("0");
     // END Final Music Library Code
 }
 
@@ -86,13 +88,15 @@ void PlaylistComponent::resized()
     
     // Final Music Library Code
     double rowH = 30;
-    loadButton.setBounds(0, rowH * 0, getWidth(), rowH * 1);
+    loadButton.setBounds(0, rowH * 0, getWidth() / 2, rowH * 1);
+    searchField.setBounds(getWidth() / 2, rowH * 0, getWidth() / 2, rowH * 1);
+    
     if (tracks.size() > 0)
     {
         tableComponent.setBounds(0, rowH * 1, getWidth(), getHeight() - rowH);
     }
     else {
-        tableComponent.setBounds(0, rowH * 1, getWidth(), rowH);
+        tableComponent.setBounds(0, rowH * 1, getWidth(), 0);
     }
     // END Final Music Library Code
 }

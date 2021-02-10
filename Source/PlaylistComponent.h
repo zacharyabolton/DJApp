@@ -88,6 +88,7 @@ private:
     WaveformDisplay* waveformDisplay2;
     
     juce::TextButton loadButton{"LOAD"};
+    juce::TextEditor searchField{"Search"};
     
     bool fileLoaded;
     
