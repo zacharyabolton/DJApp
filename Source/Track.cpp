@@ -37,3 +37,13 @@ juce::URL Track::getURL()
 {
     return url;
 }
+
+void Track::setAsResultOfSearch(bool isResultOfSearch)
+{
+    searchResult = isResultOfSearch;
+}
+
+bool Track::isResultOfSearch()
+{
+    return searchResult;
+}

@@ -21,9 +21,12 @@ public:
     juce::String getName();
     juce::String getLength();
     juce::URL getURL();
+    void setAsResultOfSearch(bool isResultOfSearch);
+    bool isResultOfSearch();
     
 private:
     juce::String name;
     juce::String length;
     juce::URL url;
+    bool searchResult = true;
 };

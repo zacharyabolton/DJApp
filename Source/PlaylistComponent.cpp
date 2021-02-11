@@ -54,7 +54,10 @@ PlaylistComponent::PlaylistComponent(DJAudioPlayer* _player1,
     addAndMakeVisible(searchField);
     loadButton.setColour(juce::TextButton::buttonColourId, juce::Colours::darkorange);
     loadButton.addListener(this);
-    // END Final Music Library Code
+    
+    searchField.addListener(this);
+    
+    searchField.setTextToShowWhenEmpty("Search...", juce::Colours::white);
 }
 
 PlaylistComponent::~PlaylistComponent()
@@ -77,8 +80,15 @@ void PlaylistComponent::paint (juce::Graphics& g)
 
     g.setColour (juce::Colours::white);
     g.setFont (14.0f);
-    g.drawText ("Drop files here...", getLocalBounds(),
-                juce::Justification::centred, true);   // draw some placeholder text
+    if (tracks.size() > 0)
+    {
+        g.drawText ("Nothing found.", getLocalBounds(),
+                    juce::Justification::centred, true);   // draw some placeholder text
+    }
+    else {
+        g.drawText ("Drop files here...", getLocalBounds(),
+                    juce::Justification::centred, true);   // draw some placeholder text
+    }
 }
 
 void PlaylistComponent::resized()
@@ -91,7 +101,7 @@ void PlaylistComponent::resized()
     loadButton.setBounds(0, rowH * 0, getWidth() / 2, rowH * 1);
     searchField.setBounds(getWidth() / 2, rowH * 0, getWidth() / 2, rowH * 1);
     
-    if (tracks.size() > 0)
+    if (searchResults.size() > 0)
     {
         tableComponent.setBounds(0, rowH * 1, getWidth(), getHeight() - rowH);
     }
@@ -103,7 +113,7 @@ void PlaylistComponent::resized()
 
 int PlaylistComponent::getNumRows()
 {
-    return static_cast<int>(tracks.size());
+    return static_cast<int>(searchResults.size());
 }
 
 void PlaylistComponent::paintRowBackground(juce::Graphics& g,
@@ -132,7 +142,7 @@ void PlaylistComponent::paintCell(juce::Graphics& g,
 {
     if (columnId == 1)
     {
-        g.drawText(tracks[rowNumber]->getName(),
+        g.drawText(searchResults[rowNumber]->getName(),
                    2,
                    0,
                    width - 4,
@@ -143,7 +153,7 @@ void PlaylistComponent::paintCell(juce::Graphics& g,
     }
     if (columnId == 2)
     {
-        g.drawText(tracks[rowNumber]->getLength(),
+        g.drawText(searchResults[rowNumber]->getLength(),
                    2,
                    0,
                    width - 4,
@@ -193,9 +203,6 @@ juce::Component* PlaylistComponent::refreshComponentForCell(int rowNumber,
 
 void PlaylistComponent::buttonClicked(juce::Button* button)
 {
-    // Final Music Library Code
-    int id = std::stoi(button->getComponentID().toStdString());
-    DBG("PlaylistComponent::buttonClicked: button clicked: id = " << id);
     if (button == &loadButton)
     {
         juce::FileChooser chooser{"Select a file..."};
@@ -206,18 +213,19 @@ void PlaylistComponent::buttonClicked(juce::Button* button)
         }
         return;
     }
+    int id = std::stoi(button->getComponentID().toStdString());
     if (id % 3 == 0)
     {
-        juce::URL url = tracks[static_cast<int>(id / 3)]->getURL();
-        juce::String title = tracks[static_cast<int>(id / 3)]->getName();
+        juce::URL url = searchResults[static_cast<int>(id / 3)]->getURL();
+        juce::String title = searchResults[static_cast<int>(id / 3)]->getName();
         player1->loadURL(url);
         waveformDisplay1->loadURL(url);
         waveformDisplay1->setCurrentTrackTitle(title);
     }
     if (id % 3 == 1)
     {
-        juce::URL url = tracks[static_cast<int>(id / 3)]->getURL();
-        juce::String title = tracks[static_cast<int>(id / 3)]->getName();
+        juce::URL url = searchResults[static_cast<int>(id / 3)]->getURL();
+        juce::String title = searchResults[static_cast<int>(id / 3)]->getName();
         player2->loadURL(url);
         waveformDisplay2->loadURL(url);
         waveformDisplay2->setCurrentTrackTitle(title);
@@ -226,26 +234,12 @@ void PlaylistComponent::buttonClicked(juce::Button* button)
     {
         removeTrack(static_cast<int>(id / 3));
     }
-    // END Final Music Library Code
 }
 
 // Final Music Library Code
 
 bool PlaylistComponent::isInterestedInFileDrag(const juce::StringArray &files)
 {
-    
-    for (juce::String filename : files)
-    {
-        auto result = juce::File{filename};
-        if (result.getFileExtension() != ".wav" &&
-            result.getFileExtension() != ".m4a" &&
-            result.getFileExtension() != ".mp3")
-        {
-            DBG("PlaylistComponent::isInterestedInFileDrag not interested");
-            return false;
-        }
-    }
-    DBG("PlaylistComponent::isInterestedInFileDrag interested");
     return true;
 }
 
@@ -291,15 +285,92 @@ void PlaylistComponent::addTrack(juce::File result)
     std::unique_ptr<Track> track(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url));
     tracks.push_back(std::move(track));
     
+    std::unique_ptr<Track> displayedTrack(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url));
+    searchResults.push_back(std::move(displayedTrack));
+    
     resized();
     tableComponent.resized();
 }
 
 void PlaylistComponent::removeTrack(int trackNum)
 {
-    tracks.erase(tracks.begin() + trackNum);
+    juce::URL trackToBeRemoved = searchResults[trackNum]->getURL();
+    for (int t = 0; t < tracks.size(); ++t)
+    {
+        if (tracks[t]->getURL() == trackToBeRemoved)
+        {
+            tracks.erase(tracks.begin() + t);
+        }
+    }
+    searchResults.erase(searchResults.begin() + trackNum);
     resized();
     tableComponent.resized();
+    textEditorTextChanged(searchField);
+}
+
+void PlaylistComponent::textEditorTextChanged(juce::TextEditor & textEditor)
+{
+    // searching procedure
+    DBG("PlaylistComponent::textEditorTextChanged: tracks.size() = " << tracks.size() << " | searchResults.size() = " << searchResults.size());
+    for (int t = 0; t < tracks.size(); ++t)
+    {
+        // look through all tracks for substring
+        // if substring found
+        if (tracks[t]->getName().containsIgnoreCase(textEditor.getText()))
+        {
+            // if not already in search results
+            if (!tracks[t]->isResultOfSearch())
+            {
+                searchResults.clear();
+                tracks[t]->setAsResultOfSearch(true);
+                for (int r = 0; r < tracks.size(); ++r)
+                {
+                    if (tracks[r]->isResultOfSearch())
+                    {
+                        std::unique_ptr<Track> track(new Track(tracks[r]->getName(), tracks[r]->getLength(), tracks[r]->getURL()));
+                        searchResults.push_back(std::move(track));
+                    }
+                }
+            }
+            else {
+                // if already in search results
+                tracks[t]->setAsResultOfSearch(true);
+            }
+        }
+        else {
+            // if substring not found
+            // if not already in search results
+            if (!tracks[t]->isResultOfSearch())
+            {
+                tracks[t]->setAsResultOfSearch(false);
+            }
+            else {
+                // if already in search results
+                for (int r = 0; r < searchResults.size(); ++r)
+                {
+                    if (tracks[t]->getURL() == searchResults[r]->getURL())
+                    {
+                        searchResults.erase(searchResults.begin() + r);
+                    }
+                }
+                tracks[t]->setAsResultOfSearch(false);
+            }
+        }
+        resized();
+        tableComponent.resized();
+        repaint();
+        tableComponent.repaint();
+    }
+}
+
+void PlaylistComponent::loadFromFile()
+{
+    
+}
+
+void PlaylistComponent::saveToFile()
+{
+    
 }
 
 // END Final Music Library Code

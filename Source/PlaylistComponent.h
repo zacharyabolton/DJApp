@@ -23,7 +23,8 @@
 class PlaylistComponent  :  public juce::Component,
                             public juce::TableListBoxModel,
                             public juce::Button::Listener,
-                            public juce::FileDragAndDropTarget
+                            public juce::FileDragAndDropTarget,
+                            public juce::TextEditor::Listener
 {
 public:
     PlaylistComponent(DJAudioPlayer* player1,
@@ -62,7 +63,6 @@ public:
     
     void buttonClicked(juce::Button* button) override;
     
-    // Final Music Library Code
     /** Impliment FileDragAndDropTarget */
     bool isInterestedInFileDrag(const juce::StringArray &files) override;
     void filesDropped(const juce::StringArray &files, int x, int y) override;
@@ -72,12 +72,16 @@ public:
     void addTrack(juce::File result);
     void removeTrack(int trackNum);
     
-    // END Final Music Library Code
-
+    void textEditorTextChanged(juce::TextEditor & textEditor) override;
+    
+    void loadFromFile();
+    void saveToFile();
+    
 private:
     
     juce::TableListBox tableComponent;
     std::vector<std::unique_ptr<Track>> tracks;
+    std::vector<std::unique_ptr<Track>> searchResults;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaylistComponent)
     
@@ -95,5 +99,7 @@ private:
     juce::AudioFormatManager& formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::AudioTransportSource transportSource;
+    
+    juce::String loadFile = "loadFile";
     // END Final Music Library Code
 };
