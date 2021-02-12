@@ -16,6 +16,11 @@
 #include "DJAudioPlayer.h"
 #include "WaveformDisplay.h"
 #include "Track.h"
+#include <iostream>
+#include <fstream>
+#include "json.hpp"
+// for convenience
+using json = nlohmann::json;
 
 //==============================================================================
 /*
@@ -69,7 +74,7 @@ public:
     
     juce::String getLengthInMinutesAndSeconds(juce::URL audioURL);
     
-    void addTrack(juce::File result);
+    void addTrack(juce::File result, juce::String length = "");
     void removeTrack(int trackNum);
     
     void textEditorTextChanged(juce::TextEditor & textEditor) override;
@@ -82,8 +87,6 @@ private:
     juce::TableListBox tableComponent;
     std::vector<std::unique_ptr<Track>> tracks;
     std::vector<std::unique_ptr<Track>> searchResults;
-    
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaylistComponent)
     
     // Final Music Library Code
     DJAudioPlayer* player1;
@@ -100,6 +103,8 @@ private:
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::AudioTransportSource transportSource;
     
-    juce::String loadFile = "loadFile";
+    juce::File loadFile;
     // END Final Music Library Code
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaylistComponent)
 };

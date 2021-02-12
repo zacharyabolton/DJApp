@@ -14,6 +14,7 @@
 #include <string>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
 #include <stdlib.h>
 
 //==============================================================================
@@ -58,10 +59,15 @@ PlaylistComponent::PlaylistComponent(DJAudioPlayer* _player1,
     searchField.addListener(this);
     
     searchField.setTextToShowWhenEmpty("Search...", juce::Colours::white);
+    
+    loadFile = juce::File::getCurrentWorkingDirectory().getChildFile("playlist.json");
+    
+    loadFromFile();
 }
 
 PlaylistComponent::~PlaylistComponent()
 {
+    saveToFile();
 }
 
 void PlaylistComponent::paint (juce::Graphics& g)
@@ -202,7 +208,7 @@ juce::Component* PlaylistComponent::refreshComponentForCell(int rowNumber,
 }
 
 void PlaylistComponent::buttonClicked(juce::Button* button)
-{
+{    
     if (button == &loadButton)
     {
         juce::FileChooser chooser{"Select a file..."};
@@ -278,16 +284,25 @@ juce::String PlaylistComponent::getLengthInMinutesAndSeconds(juce::URL audioURL)
     return length;
 }
 
-void PlaylistComponent::addTrack(juce::File result)
+void PlaylistComponent::addTrack(juce::File result, juce::String length)
 {
     auto url = juce::URL{result};
 
-    std::unique_ptr<Track> track(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url));
-    tracks.push_back(std::move(track));
-    
-    std::unique_ptr<Track> displayedTrack(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url));
-    searchResults.push_back(std::move(displayedTrack));
-    
+    if (length == "")
+    {
+        std::unique_ptr<Track> track(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url));
+        tracks.push_back(std::move(track));
+        
+        std::unique_ptr<Track> displayedTrack(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url));
+        searchResults.push_back(std::move(displayedTrack));
+    }
+    else {
+        std::unique_ptr<Track> track(new Track(result.getFileNameWithoutExtension(), length, url));
+        tracks.push_back(std::move(track));
+        
+        std::unique_ptr<Track> displayedTrack(new Track(result.getFileNameWithoutExtension(), length, url));
+        searchResults.push_back(std::move(displayedTrack));
+    }
     resized();
     tableComponent.resized();
 }
@@ -365,12 +380,79 @@ void PlaylistComponent::textEditorTextChanged(juce::TextEditor & textEditor)
 
 void PlaylistComponent::loadFromFile()
 {
-    
+    // code adapted from https://forum.juce.com/t/example-for-creating-a-file-and-doing-something-with-it/31998/2
+    if (! loadFile.existsAsFile())
+    {
+        DBG ("File doesn't exist ...");
+    }
+
+    std::unique_ptr<juce::FileInputStream> input (loadFile.createInputStream());
+
+    if (! input->openedOk())
+    {
+        DBG("Failed to open file");
+        // ... Error handling here
+    }
+
+    juce::String content = input->readString();
+    auto j = json::parse(content.toStdString());
+
+    for (auto& element : j) {
+        auto urlStr = element["url"].get<std::string>();
+        juce::String url = urlStr;
+        juce::String path = url.substring(7, url.length());
+        juce::File loadTrack{path};
+        auto lengthStr = element["length"].get<std::string>();
+        juce::String length = lengthStr;
+        addTrack(loadTrack, length);
+    }
+    // END adapted code
 }
 
 void PlaylistComponent::saveToFile()
 {
+    json j{};
     
+    for (int t = 0; t < tracks.size(); ++t)
+    {
+        j[t]["name"] = tracks[t]->getName().toStdString();
+        j[t]["length"] = tracks[t]->getLength().toStdString();
+        j[t]["url"] = tracks[t]->getURL().toString(false).toStdString();
+    }
+
+    // code adapted from https://forum.juce.com/t/example-for-creating-a-file-and-doing-something-with-it/31998/2
+    if (! loadFile.existsAsFile())
+    {
+        DBG ("File doesn't exist ...");
+    }
+    
+    juce::TemporaryFile tempFile (loadFile);
+
+    juce::FileOutputStream output (tempFile.getFile());
+
+    if (! output.openedOk())
+    {
+        DBG ("FileOutputStream didn't open correctly ...");
+        // ... some other error handling
+    }
+
+    output.setNewLineString("\n");
+
+    juce::String contents {};
+    contents << j.dump(4);
+    
+    output.writeText(contents, false, false, "\n");
+
+    output.flush(); // (called explicitly to force an fsync on posix)
+
+    if (output.getStatus().failed())
+    {
+        DBG ("An error occurred in the FileOutputStream");
+        // ... some other error handling
+    }
+
+    tempFile.overwriteTargetFileWithTemporary();
+    // END adapted code
 }
 
 // END Final Music Library Code
