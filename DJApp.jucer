@@ -5,7 +5,6 @@
   <MAINGROUP id="FJSq05" name="DJApp">
     <GROUP id="{4CD98E31-0A36-FE1F-2960-627B1C06883A}" name="Source">
       <FILE id="wfC1fg" name="json.hpp" compile="0" resource="0" file="Source/json.hpp"/>
-      <FILE id="OPgj55" name="playlist.json" compile="0" resource="1" file="Source/playlist.json"/>
       <FILE id="dOJy6p" name="Track.cpp" compile="1" resource="0" file="Source/Track.cpp"/>
       <FILE id="csPn1L" name="Track.h" compile="0" resource="0" file="Source/Track.h"/>
       <FILE id="TjwPZl" name="RotaryDialLookAndFeel.cpp" compile="1" resource="0"

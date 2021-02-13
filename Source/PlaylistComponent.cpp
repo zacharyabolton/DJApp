@@ -60,13 +60,16 @@ PlaylistComponent::PlaylistComponent(DJAudioPlayer* _player1,
     
     searchField.setTextToShowWhenEmpty("Search...", juce::Colours::white);
     
-    loadFile = juce::File::getCurrentWorkingDirectory().getChildFile("playlist.json");
+    loadFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userHomeDirectory).getChildFile("playlist.json");
     
     loadFromFile();
 }
 
 PlaylistComponent::~PlaylistComponent()
 {
+    /* save playlist to file in home dir before finishing so that app
+       can reload tracks on next startup.
+     */
     saveToFile();
 }
 
@@ -385,26 +388,26 @@ void PlaylistComponent::loadFromFile()
     {
         DBG ("File doesn't exist ...");
     }
+    else {
+        std::unique_ptr<juce::FileInputStream> input (loadFile.createInputStream());
 
-    std::unique_ptr<juce::FileInputStream> input (loadFile.createInputStream());
+        if (! input->openedOk())
+        {
+            DBG("Failed to open file");
+            // ... Error handling here
+        }
 
-    if (! input->openedOk())
-    {
-        DBG("Failed to open file");
-        // ... Error handling here
-    }
+        juce::String content = input->readString();
+        auto j = json::parse(content.toStdString());
 
-    juce::String content = input->readString();
-    auto j = json::parse(content.toStdString());
-
-    for (auto& element : j) {
-        auto urlStr = element["url"].get<std::string>();
-        juce::String url = urlStr;
-        juce::String path = url.substring(7, url.length());
-        juce::File loadTrack{path};
-        auto lengthStr = element["length"].get<std::string>();
-        juce::String length = lengthStr;
-        addTrack(loadTrack, length);
+        for (auto& element : j) {
+            auto urlStr = element["url"].get<std::string>();
+            juce::String url = urlStr;
+            juce::File loadTrack{url};
+            auto lengthStr = element["length"].get<std::string>();
+            juce::String length = lengthStr;
+            addTrack(loadTrack, length);
+        }
     }
     // END adapted code
 }
@@ -417,7 +420,22 @@ void PlaylistComponent::saveToFile()
     {
         j[t]["name"] = tracks[t]->getName().toStdString();
         j[t]["length"] = tracks[t]->getLength().toStdString();
-        j[t]["url"] = tracks[t]->getURL().toString(false).toStdString();
+        std::string url = tracks[t]->getURL().toString(false).toStdString();
+        
+        const std::string urlSpace = "%20";
+        const std::string pathSpace = "\ ";
+
+        // code adapted from https://stackoverflow.com/a/20412841
+        std::string::size_type n = 0;
+        while ( ( n = url.find( urlSpace, n ) ) != std::string::npos )
+        {
+            url.replace( n, urlSpace.size(), pathSpace );
+            n += pathSpace.size();
+        }
+        // end adapted code
+        
+        std::string path = url.substr(7, url.length());
+        j[t]["url"] = path;
     }
 
     // code adapted from https://forum.juce.com/t/example-for-creating-a-file-and-doing-something-with-it/31998/2
