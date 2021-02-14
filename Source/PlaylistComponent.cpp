@@ -33,6 +33,7 @@ PlaylistComponent::PlaylistComponent(DJAudioPlayer* _player1,
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
     
+    // setup playlist column headers
     tableComponent.getHeader().addColumn("Track title",
                                          1, 490);
     tableComponent.getHeader().addColumn("Length",
@@ -43,7 +44,7 @@ PlaylistComponent::PlaylistComponent(DJAudioPlayer* _player1,
                                          4, 90);
     tableComponent.getHeader().addColumn("",
                                          5, 30);
-    
+    // setup architecture and basic styles for playlist
     tableComponent.setModel(this);
     tableComponent.setColour(juce::TableListBox::backgroundColourId, juce::Colours::black);
     tableComponent.getHeader().setColour(juce::TableHeaderComponent::backgroundColourId, juce::Colours::black);
@@ -51,52 +52,47 @@ PlaylistComponent::PlaylistComponent(DJAudioPlayer* _player1,
     
     addAndMakeVisible(tableComponent);
     
+    // setup architecture and basic styles for playlist meta controls (load and search)
     addAndMakeVisible(loadButton);
     addAndMakeVisible(searchField);
     loadButton.setColour(juce::TextButton::buttonColourId, juce::Colours::darkorange);
     loadButton.addListener(this);
-    
     searchField.addListener(this);
-    
     searchField.setTextToShowWhenEmpty("Search...", juce::Colours::white);
     
+    // setup file for saving playlist state to on quit
     loadFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userHomeDirectory).getChildFile("playlist.json");
-    
+    // load in playlist from last quit, if applicable
     loadFromFile();
 }
 
 PlaylistComponent::~PlaylistComponent()
 {
-    /* save playlist to file in home dir before finishing so that app
-       can reload tracks on next startup.
-     */
+    // save playlist to file in home dir before finishing so that app
+    // can reload tracks on next startup.
     saveToFile();
 }
 
 void PlaylistComponent::paint (juce::Graphics& g)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-
-    g.setColour (juce::Colours::grey);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
+    // clear the background
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    // set playlist styles
     g.setColour (juce::Colours::white);
     g.setFont (14.0f);
+    
     if (tracks.size() > 0)
     {
+        // if playlist is not empty but no tracks are being displayed
+        // means an unsatisfied search query. Inform the user.
         g.drawText ("Nothing found.", getLocalBounds(),
-                    juce::Justification::centred, true);   // draw some placeholder text
+                    juce::Justification::centred, true);
     }
     else {
+        // if playlist is empty, tell the user that they can fill it
+        // by dropping files onto playlist target
         g.drawText ("Drop files here...", getLocalBounds(),
-                    juce::Justification::centred, true);   // draw some placeholder text
+                    juce::Justification::centred, true);
     }
 }
 
@@ -105,23 +101,30 @@ void PlaylistComponent::resized()
     // This method is where you should set the bounds of any child
     // components that your component contains..
     
-    // Final Music Library Code
+    // set track listing (row) height to be 30 pixels
     double rowH = 30;
+    // load button is same height as track listing and half component width
     loadButton.setBounds(0, rowH * 0, getWidth() / 2, rowH * 1);
+    // search field is same height as track listing and half component width
     searchField.setBounds(getWidth() / 2, rowH * 0, getWidth() / 2, rowH * 1);
     
     if (searchResults.size() > 0)
     {
+        // if playlist contains tracks, draw to fill component's bounds so as to
+        // hide UI instructions underneath
         tableComponent.setBounds(0, rowH * 1, getWidth(), getHeight() - rowH);
     }
     else {
+        // if playlist does not contain tracks, collapse, so as to show
+        // UI instructions for filling playlist, unerneath
         tableComponent.setBounds(0, rowH * 1, getWidth(), 0);
     }
-    // END Final Music Library Code
 }
 
 int PlaylistComponent::getNumRows()
 {
+    // return number of rows in _displayed_ playlist, i.e. number of
+    // tracks returned by current search query
     return static_cast<int>(searchResults.size());
 }
 
@@ -134,9 +137,11 @@ void PlaylistComponent::paintRowBackground(juce::Graphics& g,
 {
     if (rowIsSelected)
     {
+        // fill selected row orange
         g.fillAll(juce::Colours::orange);
     }
     else {
+        // fill all other rows dark grey
         g.fillAll(juce::Colours::darkgrey);
     }
 }
@@ -151,6 +156,7 @@ void PlaylistComponent::paintCell(juce::Graphics& g,
 {
     if (columnId == 1)
     {
+        // draw track title
         g.drawText(searchResults[rowNumber]->getName(),
                    2,
                    0,
@@ -162,6 +168,7 @@ void PlaylistComponent::paintCell(juce::Graphics& g,
     }
     if (columnId == 2)
     {
+        // draw track length
         g.drawText(searchResults[rowNumber]->getLength(),
                    2,
                    0,
@@ -184,6 +191,8 @@ juce::Component* PlaylistComponent::refreshComponentForCell(int rowNumber,
     {
         if (columnId == 3)
         {
+            // setup 'load to left-hand deck' button,
+            // attach listener and ID, and return to be refreshed
             juce::TextButton* btn = new juce::TextButton{"load left"};
             juce::String id{std::to_string(rowNumber * 3 + 0)};
             btn->setComponentID(id);
@@ -192,6 +201,8 @@ juce::Component* PlaylistComponent::refreshComponentForCell(int rowNumber,
         }
         if (columnId == 4)
         {
+            // setup 'load to right-hand deck' button,
+            // attach listener and ID, and return to be refreshed
             juce::TextButton* btn = new juce::TextButton{"load right"};
             juce::String id{std::to_string(rowNumber * 3 + 1)};
             btn->setComponentID(id);
@@ -200,6 +211,8 @@ juce::Component* PlaylistComponent::refreshComponentForCell(int rowNumber,
         }
         if (columnId == 5)
         {
+            // setup 'delete track' button,
+            // attach listener and ID, and return to be refreshed
             juce::TextButton* btn = new juce::TextButton{"x"};
             juce::String id{std::to_string(rowNumber * 3 + 2)};
             btn->setComponentID(id);
@@ -214,17 +227,23 @@ void PlaylistComponent::buttonClicked(juce::Button* button)
 {    
     if (button == &loadButton)
     {
+        // if load button has been clicked open file picker
         juce::FileChooser chooser{"Select a file..."};
         if (chooser.browseForFileToOpen())
         {
+            // if user has chosen a file to load, add to playlist
             auto result = chooser.getResult();
             addTrack(result);
         }
+        // load button is only child button without id, so
+        // return to stop rest of execution and avoid error
         return;
     }
+    // if not load button, get button ID
     int id = std::stoi(button->getComponentID().toStdString());
     if (id % 3 == 0)
     {
+        // if button is 'load to left-hand deck' button, do so
         juce::URL url = searchResults[static_cast<int>(id / 3)]->getURL();
         juce::String title = searchResults[static_cast<int>(id / 3)]->getName();
         player1->loadURL(url);
@@ -233,6 +252,7 @@ void PlaylistComponent::buttonClicked(juce::Button* button)
     }
     if (id % 3 == 1)
     {
+        // if button is 'load to right-hand deck' button, do so
         juce::URL url = searchResults[static_cast<int>(id / 3)]->getURL();
         juce::String title = searchResults[static_cast<int>(id / 3)]->getName();
         player2->loadURL(url);
@@ -241,22 +261,22 @@ void PlaylistComponent::buttonClicked(juce::Button* button)
     }
     if (id % 3 == 2)
     {
+        // if button is 'delete track' button, do so
         removeTrack(static_cast<int>(id / 3));
     }
 }
 
-// Final Music Library Code
-
 bool PlaylistComponent::isInterestedInFileDrag(const juce::StringArray &files)
 {
+    // accepts all files
     return true;
 }
 
 void PlaylistComponent::filesDropped(const juce::StringArray& files, int x, int y)
 {
-    DBG("PlaylistComponent::filesDropped");
     for (juce::String filename : files)
     {
+        // loop through tracks and add each to playlist
         auto result = juce::File{filename};
         addTrack(result);
     }
@@ -264,6 +284,8 @@ void PlaylistComponent::filesDropped(const juce::StringArray& files, int x, int 
 
 juce::String PlaylistComponent::getLengthInMinutesAndSeconds(juce::URL audioURL)
 {
+    // parse file with AudioFormatManager to get length in seconds (double) and convert
+    // into string of form "MM:SS" (minutes and seconds)
     auto* reader = formatManager.createReaderFor(audioURL.createInputStream(false));
     if (reader != nullptr) // good file!
     {
@@ -289,10 +311,15 @@ juce::String PlaylistComponent::getLengthInMinutesAndSeconds(juce::URL audioURL)
 
 void PlaylistComponent::addTrack(juce::File result, juce::String length)
 {
+    // add a track to the playlist
+    
+    // get URL from File
     auto url = juce::URL{result};
 
     if (length == "")
     {
+        // if length is not passed in it means it is a fresh file
+        // and should setup for the first time
         std::unique_ptr<Track> track(new Track(result.getFileNameWithoutExtension(), getLengthInMinutesAndSeconds(url), url));
         tracks.push_back(std::move(track));
         
@@ -300,18 +327,23 @@ void PlaylistComponent::addTrack(juce::File result, juce::String length)
         searchResults.push_back(std::move(displayedTrack));
     }
     else {
+        // if length is passed in it means it is a track coming from
+        // loadFile and does not need to be setup from scratch
         std::unique_ptr<Track> track(new Track(result.getFileNameWithoutExtension(), length, url));
         tracks.push_back(std::move(track));
         
         std::unique_ptr<Track> displayedTrack(new Track(result.getFileNameWithoutExtension(), length, url));
         searchResults.push_back(std::move(displayedTrack));
     }
+    
+    // resize everything to display new track
     resized();
     tableComponent.resized();
 }
 
 void PlaylistComponent::removeTrack(int trackNum)
 {
+    // remove track from both search results vector and tracks vector
     juce::URL trackToBeRemoved = searchResults[trackNum]->getURL();
     for (int t = 0; t < tracks.size(); ++t)
     {
@@ -321,15 +353,18 @@ void PlaylistComponent::removeTrack(int trackNum)
         }
     }
     searchResults.erase(searchResults.begin() + trackNum);
+    
+    // resize everything to display new track list
     resized();
     tableComponent.resized();
+    
+    // refresh search results to reflect new tracks vector state
     textEditorTextChanged(searchField);
 }
 
 void PlaylistComponent::textEditorTextChanged(juce::TextEditor & textEditor)
 {
     // searching procedure
-    DBG("PlaylistComponent::textEditorTextChanged: tracks.size() = " << tracks.size() << " | searchResults.size() = " << searchResults.size());
     for (int t = 0; t < tracks.size(); ++t)
     {
         // look through all tracks for substring
@@ -374,6 +409,7 @@ void PlaylistComponent::textEditorTextChanged(juce::TextEditor & textEditor)
                 tracks[t]->setAsResultOfSearch(false);
             }
         }
+        // resize and repaint everything to reflect results of search
         resized();
         tableComponent.resized();
         repaint();
@@ -386,20 +422,25 @@ void PlaylistComponent::loadFromFile()
     // code adapted from https://forum.juce.com/t/example-for-creating-a-file-and-doing-something-with-it/31998/2
     if (! loadFile.existsAsFile())
     {
-        DBG ("File doesn't exist ...");
+        // File doesn't exist
+        // return and proceed with execution
+        return;
     }
     else {
         std::unique_ptr<juce::FileInputStream> input (loadFile.createInputStream());
 
         if (! input->openedOk())
         {
-            DBG("Failed to open file");
-            // ... Error handling here
+            // Failed to open file
+            // return and proceed with execution
+            return;
         }
 
         juce::String content = input->readString();
         auto j = json::parse(content.toStdString());
 
+        // convert json objects for tracks into class Track objects, usable by playlist component
+        // and add to playlist
         for (auto& element : j) {
             auto urlStr = element["url"].get<std::string>();
             juce::String url = urlStr;
@@ -414,18 +455,20 @@ void PlaylistComponent::loadFromFile()
 
 void PlaylistComponent::saveToFile()
 {
+    // create empty json object to store json date to be saved to file
     json j{};
     
     for (int t = 0; t < tracks.size(); ++t)
     {
+        // convert class Track objects objects for tracks json objects, for
+        // storing to state save file
         j[t]["name"] = tracks[t]->getName().toStdString();
         j[t]["length"] = tracks[t]->getLength().toStdString();
         std::string url = tracks[t]->getURL().toString(false).toStdString();
-        
+        // code adapted from https://stackoverflow.com/a/20412841
+        // convert url style paths to system style paths
         const std::string urlSpace = "%20";
         const std::string pathSpace = "\ ";
-
-        // code adapted from https://stackoverflow.com/a/20412841
         std::string::size_type n = 0;
         while ( ( n = url.find( urlSpace, n ) ) != std::string::npos )
         {
@@ -433,7 +476,7 @@ void PlaylistComponent::saveToFile()
             n += pathSpace.size();
         }
         // end adapted code
-        
+        // convert url style paths to system style paths
         std::string path = url.substr(7, url.length());
         j[t]["url"] = path;
     }
@@ -441,7 +484,9 @@ void PlaylistComponent::saveToFile()
     // code adapted from https://forum.juce.com/t/example-for-creating-a-file-and-doing-something-with-it/31998/2
     if (! loadFile.existsAsFile())
     {
-        DBG ("File doesn't exist ...");
+        // File doesn't exist
+        // return and proceed with execution
+        return;
     }
     
     juce::TemporaryFile tempFile (loadFile);
@@ -450,8 +495,9 @@ void PlaylistComponent::saveToFile()
 
     if (! output.openedOk())
     {
-        DBG ("FileOutputStream didn't open correctly ...");
-        // ... some other error handling
+        // FileOutputStream didn't open correctly
+        // return and proceed with execution
+        return;
     }
 
     output.setNewLineString("\n");
@@ -465,12 +511,11 @@ void PlaylistComponent::saveToFile()
 
     if (output.getStatus().failed())
     {
-        DBG ("An error occurred in the FileOutputStream");
-        // ... some other error handling
+        // An error occurred in the FileOutputStream
+        // return and proceed with execution
+        return;
     }
 
     tempFile.overwriteTargetFileWithTemporary();
     // END adapted code
 }
-
-// END Final Music Library Code

@@ -15,9 +15,14 @@
 class RotaryDialLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
+    /**
+     constructor */
     RotaryDialLookAndFeel(juce::String label);
+    /**
+     destructor */
     ~RotaryDialLookAndFeel();
-    
+    /**
+     draws rotary dial to the screen */
     void drawRotarySlider(juce::Graphics &g, int x, int y, int width, int height, float sliderPos, float startAngle, float endAngle, juce::Slider& slider) override;
 private:
     juce::String label;

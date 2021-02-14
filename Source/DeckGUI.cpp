@@ -96,12 +96,13 @@ void DeckGUI::paint (juce::Graphics& g)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
 
     g.setColour (juce::Colours::grey);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
 
-    g.setColour (juce::Colours::white);
+    g.setColour (juce::Colours::orange);
     g.setFont (14.0f);
+//    g.drawRect (getLocalBounds(), 0);
     
     // Final GUI Component Code
+    g.drawText("High-pass filter", getWidth() / 2, 0, getWidth() / 2, 40, juce::Justification::centred);
     freqDial.setLookAndFeel(&freqDialLookAndFeel);
     resDial.setLookAndFeel(&resDialLookAndFeel);
     // END Final GUI Component Code
@@ -110,8 +111,15 @@ void DeckGUI::paint (juce::Graphics& g)
 void DeckGUI::resized()
 {
     // Final GUI Component Code
-    freqDial.setBounds(getWidth() / 2, 0, getWidth() / 2, getHeight() / 2);
-    resDial.setBounds(getWidth() / 2, getHeight() / 2, getWidth() / 2, getHeight() / 2);
+    freqDial.setBounds(getWidth() / 2,
+                       40,
+                       getWidth() / 2,
+                       (getHeight() - 40) / 2);
+    
+    resDial.setBounds(getWidth() / 2,
+                      (getHeight() / 2) + 20,
+                      getWidth() / 2,
+                      (getHeight() - 40) / 2);
     
     freqDial.setTextBoxStyle(juce::Slider::TextBoxAbove, true, getWidth() / 4, 20);
     resDial.setTextBoxStyle(juce::Slider::TextBoxAbove, true, getWidth() / 4, 20);
