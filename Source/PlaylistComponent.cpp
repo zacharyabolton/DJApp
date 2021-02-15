@@ -482,13 +482,6 @@ void PlaylistComponent::saveToFile()
     }
 
     // code adapted from https://forum.juce.com/t/example-for-creating-a-file-and-doing-something-with-it/31998/2
-    if (! loadFile.existsAsFile())
-    {
-        // File doesn't exist
-        // return and proceed with execution
-        return;
-    }
-    
     juce::TemporaryFile tempFile (loadFile);
 
     juce::FileOutputStream output (tempFile.getFile());

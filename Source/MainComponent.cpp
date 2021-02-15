@@ -22,11 +22,13 @@ MainComponent::MainComponent()
     
     getLookAndFeel().setColour(juce::ResizableWindow::backgroundColourId, juce::Colours::black);
     
+    // reveal both decks
     addAndMakeVisible(deckGUI1);
     addAndMakeVisible(deckGUI2);
-    
+    // reveal playlist component
     addAndMakeVisible(playlistComponent);
-    
+    // register basic formats once ahead of other component creation
+    // for passing to audio players
     formatManager.registerBasicFormats();
 }
 
@@ -39,14 +41,17 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
+    // register both players with mixerSource for parallel playback
     mixerSource.addInputSource(&player1, false);
     mixerSource.addInputSource(&player2, false);
+    // prepare both players for plaback
     player1.prepareToPlay(samplesPerBlockExpected, sampleRate);
     player2.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
+    // pass incoming audio block to mixerSource
     mixerSource.getNextAudioBlock(bufferToFill);
 }
 
@@ -56,6 +61,8 @@ void MainComponent::releaseResources()
     // restarted due to a setting change.
 
     // For more details, see the help for AudioProcessor::releaseResources()
+    
+    // release resources from sources and players
     mixerSource.removeAllInputs();
     mixerSource.releaseResources();
     player1.releaseResources();
@@ -67,15 +74,13 @@ void MainComponent::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
-    // You can add your drawing code here!
-    
 }
 
 void MainComponent::resized()
 {
+    // keep decks within resonable bounds on resize
     deckGUI1.setBounds(0, 0, getWidth() / 2, getHeight() * 0.6);
     deckGUI2.setBounds(getWidth() / 2, 0, getWidth() / 2, getHeight() * 0.6);
-    
+    // keep playlist component within resonable bounds on resize
     playlistComponent.setBounds(0, getHeight() * 0.6, getWidth(), getHeight() * 0.4);
 }

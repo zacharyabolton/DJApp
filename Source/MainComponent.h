@@ -14,16 +14,35 @@ class MainComponent  : public juce::AudioAppComponent
 {
 public:
     //==============================================================================
+    /**
+     constructor */
     MainComponent();
+    /**
+     destructor */
     ~MainComponent() override;
 
     //==============================================================================
+    /**
+     from https://docs.juce.com/master/classAudioAppComponent.html#aa98326bd4ae4bd9bdc95e6d45d57e60c
+     "Tells the source to prepare for playing." */
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
+    /**
+     from https://docs.juce.com/master/classAudioAppComponent.html#a912d68c09e3ac5bd7a3dbc35065c0844
+     "Called repeatedly to fetch subsequent blocks of audio data." */
     void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;
+    /**
+     from https://docs.juce.com/master/classAudioAppComponent.html#a76666e730166d2db46ada4074d5858e5
+     "Allows the source to release anything it no longer needs after playback has stopped." */
     void releaseResources() override;
 
     //==============================================================================
+    /**
+     from https://docs.juce.com/master/classComponent.html#a7cf1862f4af5909ea72827898114a182
+     "Components can override this method to draw their content." */
     void paint (juce::Graphics& g) override;
+    /**
+     from https://docs.juce.com/master/classComponent.html#ad896183a68d71daf5816982d1fefd960
+     "Called when this component's size has been changed." */
     void resized() override;
 
 private:

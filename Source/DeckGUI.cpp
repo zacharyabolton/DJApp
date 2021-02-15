@@ -18,12 +18,15 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     : waveformDisplay(formatManagerToUse, cacheToUse),
     player(_player)
 {
+    // reveal different sub components
     addAndMakeVisible(playButton);
     addAndMakeVisible(stopButton);
     addAndMakeVisible(volSlider);
     addAndMakeVisible(speedSlider);
     addAndMakeVisible(posSlider);
     addAndMakeVisible(waveformDisplay);
+    addAndMakeVisible(freqDial);
+    addAndMakeVisible(resDial);
     
     // My default styles
     getLookAndFeel().setColour(juce::Slider::thumbColourId, juce::Colours::blue);
@@ -31,13 +34,11 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     getLookAndFeel().setColour(juce::Slider::backgroundColourId, juce::Colours::darkgrey);
     getLookAndFeel().setColour(juce::TextButton::buttonColourId, juce::Colours::maroon);
     
-    // Final GUI Component Code
+    // make high pass filter dials rotary
     freqDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
     resDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
     
-    addAndMakeVisible(freqDial);
-    addAndMakeVisible(resDial);
-
+    // set ranges and values for sliders and dials
     freqDial.setRange(20.0f, 20000.0f);
     freqDial.setTextValueSuffix("Hz");
     freqDial.setNumDecimalPlacesToDisplay(2);
@@ -45,20 +46,7 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     resDial.setRange(0.3f, 20.0f);
     resDial.setValue(0.71f);
     resDial.setNumDecimalPlacesToDisplay(2);
-    
     freqDial.setSkewFactorFromMidPoint(1000.0f);
-    
-    freqDial.addListener(this);
-    resDial.addListener(this);
-    // END Final GUI Component Code
-    
-    playButton.addListener(this);
-    playButton.setColour(juce::TextButton::buttonColourId, juce::Colours::green);
-    stopButton.addListener(this);
-    volSlider.addListener(this);
-    speedSlider.addListener(this);
-    posSlider.addListener(this);
-
     volSlider.setRange(0.0, 100.0);
     volSlider.setValue(50.0);
     volSlider.setNumDecimalPlacesToDisplay(0);
@@ -73,82 +61,84 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     posSlider.setNumDecimalPlacesToDisplay(2);
     posSlider.setTextValueSuffix(" Position");
     posSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxAbove, true, 100, 20);
+    
+    // add listeners to all interactive components
+    freqDial.addListener(this);
+    resDial.addListener(this);
+    playButton.addListener(this);
+    stopButton.addListener(this);
+    volSlider.addListener(this);
+    speedSlider.addListener(this);
+    posSlider.addListener(this);
 
+    // make play button green to indicate purpose
+    playButton.setColour(juce::TextButton::buttonColourId, juce::Colours::green);
+    
+    // set callback timer to broadcast 10 times every second
+    // to keep animation smooth
     startTimer(100);
     
+    // update high pass filter with initial values
     player->updateFilter(freqDial.getValue(), resDial.getValue());
 }
 
 DeckGUI::~DeckGUI()
 {
+    // stop timer on app quit
     stopTimer();
 }
 
 void DeckGUI::paint (juce::Graphics& g)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-
-    g.setColour (juce::Colours::grey);
-
+    // clear the background
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    // set GUI trim color to be orange
+    // and set font size to 14 points
     g.setColour (juce::Colours::orange);
     g.setFont (14.0f);
-//    g.drawRect (getLocalBounds(), 0);
-    
-    // Final GUI Component Code
+    // write out a label for high pass filter
     g.drawText("High-pass filter", getWidth() / 2, 0, getWidth() / 2, 40, juce::Justification::centred);
+    // apply custom styles to high pass filter controls
     freqDial.setLookAndFeel(&freqDialLookAndFeel);
     resDial.setLookAndFeel(&resDialLookAndFeel);
-    // END Final GUI Component Code
 }
 
 void DeckGUI::resized()
 {
-    // Final GUI Component Code
+    // keep high-pass filter controls within reasonable bounds on resize
     freqDial.setBounds(getWidth() / 2,
                        40,
                        getWidth() / 2,
                        (getHeight() - 40) / 2);
-    
     resDial.setBounds(getWidth() / 2,
                       (getHeight() / 2) + 20,
                       getWidth() / 2,
                       (getHeight() - 40) / 2);
-    
+    // keep high-pass filter readouts within reasonable bounds on resize
     freqDial.setTextBoxStyle(juce::Slider::TextBoxAbove, true, getWidth() / 4, 20);
     resDial.setTextBoxStyle(juce::Slider::TextBoxAbove, true, getWidth() / 4, 20);
-    // END Final GUI Component Code
-    
+    // setup a constant row height by which to control the layout of other components
     double rowH = getHeight() / 8;
     double spacer = rowH / 3;
-    
+    // keep sizing of other components within reasonable bounds on resize
     playButton.setBounds(0, 0, getWidth() / 2, rowH);
     stopButton.setBounds(0, rowH, getWidth() / 2, rowH);
-    
     volSlider.setBounds(0, rowH * 2 + spacer * 1, getWidth() / 2, rowH);
-    
     speedSlider.setBounds(0, rowH * 3 + spacer * 2, getWidth() / 2, rowH);
-    
     posSlider.setBounds(0, rowH * 4 + spacer * 3, getWidth() / 2, rowH);
-    
     waveformDisplay.setBounds(0, rowH * 6, getWidth() / 2, rowH * 2);
-
 }
 
 void DeckGUI::buttonClicked(juce::Button* button)
 {
     if (button == &playButton)
     {
+        // if play button is clicked, start playback of loaded track
         player->start();
     }
     if (button == &stopButton)
     {
+        // if stop button is clicked, cease playback of loaded track
         player->stop();
     }
 }
@@ -157,25 +147,29 @@ void DeckGUI::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == &volSlider)
     {
+        // if volume slider is changed, adjust gain accordingly
         player->setGain(slider->getValue() / 100);
     }
     if (slider == &speedSlider)
     {
+        // if speed slider is changed, adjust playback speed accordingly
         player->setSpeed(slider->getValue());
     }
     if (slider == &posSlider)
     {
+        // if position slider is changed, adjust play head position occordingly
         player->setPositionRelative(slider->getValue());
     }
-    // Final GUI Component Code
     if (slider == &freqDial || slider == &resDial)
     {
+        // if high-pass controls change, update high pass filter accordingly
         player->updateFilter(freqDial.getValue(), resDial.getValue());
     }
-    // Final GUI Component Code
 }
 
 void DeckGUI::timerCallback()
 {
+    // update the wave form display play head visual to keep position
+    // relative to current moment in playback
     waveformDisplay.setPositionRelative(player->getPositionRelative());
 }

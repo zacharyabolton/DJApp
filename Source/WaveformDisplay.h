@@ -19,20 +19,29 @@ class WaveformDisplay  :    public juce::Component,
                             public juce::ChangeListener
 {
 public:
+    /**
+     constructor */
     WaveformDisplay(juce::AudioFormatManager& formatManagerToUse,
                     juce::AudioThumbnailCache& cacheToUse);
+    /**
+     destructor */
     ~WaveformDisplay() override;
-
+    /**
+     from https://docs.juce.com/master/classComponent.html#a7cf1862f4af5909ea72827898114a182
+     "The paint() method gets called when a region of a component needs redrawing, either because the component's repaint() method has been called, or because something has happened on the screen that means a section of a window needs to be redrawn." */
     void paint (juce::Graphics&) override;
+    /**
+     from https://docs.juce.com/master/classComponent.html#ad896183a68d71daf5816982d1fefd960
+     "Called when this component's size has been changed." */
     void resized() override;
-    
+    /**
+     from https://docs.juce.com/master/classChangeListener.html#a027420041071315201df11e19a36ea18
+     "Your subclass should implement this method to receive the callbac" */
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
-    
+    /** load file from disk for wave form display */
     void loadURL(juce::URL audioURL);
-    
     /** set the relative position of the playhead */
     void setPositionRelative(double pos);
-    
     /** set the title to be displayed of the track currently playing */
     void setCurrentTrackTitle(juce::String title);
     /** get the title to be displayed of the track currently playing */
