@@ -34,6 +34,14 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     getLookAndFeel().setColour(juce::Slider::backgroundColourId, juce::Colours::darkgrey);
     getLookAndFeel().setColour(juce::TextButton::buttonColourId, juce::Colours::maroon);
     
+    // make play button green to indicate purpose
+    playButton.setColour(juce::TextButton::buttonColourId, juce::Colours::green);
+    
+    // set control readouts to be above controls
+    volSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxAbove, true, 100, 20);
+    speedSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxAbove, true, 100, 20);
+    posSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxAbove, true, 100, 20);
+    
     // make high pass filter dials rotary
     freqDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
     resDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
@@ -51,16 +59,14 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     volSlider.setValue(50.0);
     volSlider.setNumDecimalPlacesToDisplay(0);
     volSlider.setTextValueSuffix("% Volume");
-    volSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxAbove, true, 100, 20);
     speedSlider.setRange(0.1, 2.0);
     speedSlider.setNumDecimalPlacesToDisplay(2);
     speedSlider.setValue(1.0);
     speedSlider.setTextValueSuffix("x Speed");
-    speedSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxAbove, true, 100, 20);
     posSlider.setRange(0.0, 1.0);
     posSlider.setNumDecimalPlacesToDisplay(2);
     posSlider.setTextValueSuffix(" Position");
-    posSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxAbove, true, 100, 20);
+    
     
     // add listeners to all interactive components
     freqDial.addListener(this);
@@ -70,9 +76,6 @@ DeckGUI::DeckGUI(DJAudioPlayer* _player,
     volSlider.addListener(this);
     speedSlider.addListener(this);
     posSlider.addListener(this);
-
-    // make play button green to indicate purpose
-    playButton.setColour(juce::TextButton::buttonColourId, juce::Colours::green);
     
     // set callback timer to broadcast 10 times every second
     // to keep animation smooth

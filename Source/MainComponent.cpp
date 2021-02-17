@@ -20,6 +20,7 @@ MainComponent::MainComponent()
         setAudioChannels (0, 2);
     }
     
+    // set the background color to be black for the whole app
     getLookAndFeel().setColour(juce::ResizableWindow::backgroundColourId, juce::Colours::black);
     
     // reveal both decks
