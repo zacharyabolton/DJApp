@@ -24,7 +24,7 @@ class DeckGUI  : public juce::Component,
                  public juce::Timer
 {
 public:
-    /**
+    /** inputs: pointer to the audio player for the deck (DJAudioPlayer*); reference to the audio format manager (juce::AudioFormatManager&); reference to the audio thumbnail cache (juce::AudioThumbnailCache&)
      constructor */
     DeckGUI(DJAudioPlayer* player,
             juce::AudioFormatManager& formatManagerToUse,
@@ -32,7 +32,7 @@ public:
     /**
      destructor */
     ~DeckGUI() override;
-    /**
+    /** inputs: reference to the graphics to be painted to (juce::Graphics&)
      from https://docs.juce.com/master/classComponent.html#a7cf1862f4af5909ea72827898114a182
      "The paint() method gets called when a region of a component needs redrawing, either because the component's repaint() method has been called, or because something has happened on the screen that means a section of a window needs to be redrawn." */
     void paint (juce::Graphics&) override;
@@ -40,11 +40,11 @@ public:
      from https://docs.juce.com/master/classComponent.html#ad896183a68d71daf5816982d1fefd960
      "Called when this component's size has been changed." */
     void resized() override;
-    /**
+    /** inputs: pointer to the button registering the click (juce::Button*)
      from https://docs.juce.com/master/classButton_1_1Listener.html#a81499cef24b7189cd0d1581fd9dc9e14
      "Called when the button is clicked." */
     void buttonClicked(juce::Button* button) override;
-    /**
+    /** inputs: pointer to the slider registering the change (juce::Slider*)
      from https://docs.juce.com/master/classSlider_1_1Listener.html#a127bfe68835dc3e584cf3c2a427a27e5
      "Called when the slider's value is changed." */
     void sliderValueChanged(juce::Slider* slider) override;
